@@ -479,53 +479,6 @@ project-root/
   </style>
 </head>
 
-<section id="car-list"></section>
-
-<!------------------------------ SUPABASE ------------------------------->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-  const SUPABASE_URL = "https://liipbpmjqjqxkuflufkv.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpaXBicG1qcWpxeGt1Zmx1Zmt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MTg0MjYsImV4cCI6MjA4MTQ5NDQyNn0.LrIRgiVCE6E9vyXduQZEkdKAmmLDij2kQN2ajjavTS8";
-  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-</script>
-
-<script>
-async function loadCars() {
-  const { data, error } = await db.from("cars").select("*");
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  const container = document.getElementById("car-list");
-  container.innerHTML = "";
-
-  console.log("Rendered", data.length, "cars");
-
-  data.forEach(car => {
-    const card = document.createElement("div");
-    card.className = "car-card";
-
-    card.innerHTML = `
-      <h3>${car.title} (${car.year})</h3>
-      <p>${car.description}</p>
-      <strong>${car.price}</strong>
-    `;
-
-    container.appendChild(card);
-  });
-}
-
-loadCars();
-</script>
-
-
-
-
-<!------------------------------ END SUPABASE ------------------------------>
-
 <body>
 
 <header>
@@ -577,7 +530,51 @@ loadCars();
     <a class="sold-link" href="sold.html">View Sold Cars →</a>
   </div>
 </section>
+<!------------------------------ SUPABASE ------------------------------->
+<section class="cars">
+  <h2>Available Cars</h2>
+  <div id="car-list"></div>
+</section>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = "https://liipbpmjqjqxkuflufkv.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpaXBicG1qcWpxeGt1Zmx1Zmt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MTg0MjYsImV4cCI6MjA4MTQ5NDQyNn0.LrIRgiVCE6E9vyXduQZEkdKAmmLDij2kQN2ajjavTS8";
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+
+<script>
+async function loadCars() {
+  const { data, error } = await db.from("cars").select("*");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const container = document.getElementById("car-list");
+  container.innerHTML = "";
+
+  console.log("Rendered", data.length, "cars");
+
+  data.forEach(car => {
+    const card = document.createElement("div");
+    card.className = "car-card";
+
+    card.innerHTML = `
+      <h3>${car.title} (${car.year})</h3>
+      <p>${car.description}</p>
+      <strong>${car.price}</strong>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+loadCars();
+</script>
+<!------------------------------ END SUPABASE ------------------------------>
 <section id="cars" class="container">
   <div class="grid" id="grid">
     
