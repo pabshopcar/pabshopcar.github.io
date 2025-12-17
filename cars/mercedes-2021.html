@@ -291,19 +291,7 @@
       object-fit:contain;
       background:var(--bg);
       cursor:pointer;
-      transition:transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
-      animation:fadeSlideIn 0.6s ease;
-    }
-    
-    @keyframes fadeSlideIn {
-      from {
-        opacity:0;
-        transform:translateX(30px);
-      }
-      to {
-        opacity:1;
-        transform:translateX(0);
-      }
+      transition:transform 0.3s ease;
     }
     
     .slider-btn{
@@ -372,14 +360,13 @@
       left:0;
       width:100%;
       height:100%;
-      background:linear-gradient(135deg, rgba(0,0,0,0.97) 0%, rgba(15,23,42,0.98) 100%);
-      backdrop-filter:blur(20px);
+      background:rgba(0,0,0,0.95);
       z-index:2000;
       display:none;
       align-items:center;
       justify-content:center;
       opacity:0;
-      transition:opacity 0.4s ease;
+      transition:opacity 0.3s ease;
     }
     .fullscreen-overlay.active{
       display:flex;
@@ -389,93 +376,71 @@
       max-width:90%;
       max-height:90%;
       object-fit:contain;
-      border-radius:12px;
-      box-shadow:0 20px 80px rgba(0,0,0,0.5);
-      animation:zoomIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    
-    @keyframes zoomIn {
-      from {
-        opacity:0;
-        transform:scale(0.8);
-      }
-      to {
-        opacity:1;
-        transform:scale(1);
-      }
-    }
-    
     .fullscreen-close{
       position:absolute;
-      top:30px;
+      top:20px;
       right:30px;
-      font-size:32px;
+      font-size:40px;
       color:#fff;
       cursor:pointer;
-      background:rgba(255,255,255,0.1);
-      backdrop-filter:blur(10px);
-      width:56px;
-      height:56px;
+      background:rgba(0,0,0,0.5);
+      width:50px;
+      height:50px;
       border-radius:50%;
       display:flex;
       align-items:center;
       justify-content:center;
-      transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border:2px solid rgba(255,255,255,0.2);
+      transition:all 0.3s ease;
+      border:2px solid rgba(255,255,255,0.3);
       z-index:2001;
     }
     .fullscreen-close:hover{
-      background:rgba(255,255,255,0.2);
-      transform:rotate(90deg) scale(1.1);
-      border-color:rgba(255,255,255,0.4);
+      background:rgba(0,0,0,0.8);
+      transform:rotate(90deg);
     }
     .fullscreen-nav{
       position:absolute;
       top:50%;
       transform:translateY(-50%);
-      background:rgba(255,255,255,0.15);
-      backdrop-filter:blur(10px);
-      border:2px solid rgba(255,255,255,0.3);
-      width:64px;
-      height:64px;
+      background:linear-gradient(135deg,var(--accent),#2b8fff);
+      border:none;
+      width:60px;
+      height:60px;
       border-radius:50%;
       cursor:pointer;
-      font-size:32px;
+      font-size:30px;
       display:flex;
       align-items:center;
       justify-content:center;
-      transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow:0 8px 30px rgba(0,0,0,0.3);
+      transition:all 0.3s ease;
+      box-shadow:0 4px 15px rgba(11,110,255,0.5);
       z-index:2001;
       color:#fff;
     }
     .fullscreen-nav:hover{
-      background:rgba(255,255,255,0.25);
       transform:translateY(-50%) scale(1.15);
-      box-shadow:0 12px 40px rgba(255,255,255,0.2);
-      border-color:rgba(255,255,255,0.5);
+      box-shadow:0 8px 25px rgba(11,110,255,0.7);
     }
     .fullscreen-nav:active{
       transform:translateY(-50%) scale(1.05);
     }
-    .fullscreen-nav.prev{left:40px}
-    .fullscreen-nav.next{right:40px}
+    .fullscreen-nav.prev{left:30px}
+    .fullscreen-nav.next{right:30px}
     .fullscreen-counter{
       position:absolute;
-      bottom:40px;
+      bottom:30px;
       left:50%;
       transform:translateX(-50%);
-      background:rgba(255,255,255,0.15);
-      backdrop-filter:blur(10px);
-      border:2px solid rgba(255,255,255,0.25);
+      background:linear-gradient(135deg,var(--accent),#2b8fff);
       color:#fff;
-      padding:14px 32px;
-      border-radius:30px;
-      font-size:17px;
+      padding:12px 28px;
+      border-radius:25px;
+      font-size:16px;
       font-weight:700;
       z-index:2001;
-      box-shadow:0 8px 30px rgba(0,0,0,0.3);
-      letter-spacing:2px;
+      box-shadow:0 4px 15px rgba(11,110,255,0.5);
+      letter-spacing:1px;
     }
     
     .thumbs{
@@ -655,7 +620,7 @@
       margin:0 auto;
       justify-content:center;
       flex-direction:column;
-      padding:0 0;
+      padding:0 20px;
     }
     .contact-btn{
       display:inline-block;
@@ -945,14 +910,12 @@
   <!-- ============================================================ -->
   <!-- CONTACT SECTION - EXACT COPY FROM INDEX.HTML -->
   <!-- ============================================================ -->
-  <section id="contact">
-    <div class="container">
-      <h2>Contact Us</h2>
-      <p>Contact us for more information</p>
-      <div class="contact-buttons">
-        <a href="tel:+15165657312" class="contact-btn">📞 Call: +1 (516) 565-7312</a>
-        <a href="mailto:sales@pabshop.com" class="contact-btn email">✉️ Email Us</a>
-      </div>
+  <section id="contact" class="container">
+    <h2>Contact Us</h2>
+    <p>Contact us for more information</p>
+    <div class="contact-buttons">
+      <a href="tel:+15165657312" class="contact-btn">📞 Call: +1 (516) 565-7312</a>
+      <a href="mailto:sales@pabshop.com" class="contact-btn email">✉️ Email Us</a>
     </div>
   </section>
 </div>
@@ -1045,58 +1008,25 @@
   }
 
   function changeSlide(direction) {
-    const mainImg = document.getElementById('mainImg');
-    mainImg.style.opacity = '0';
-    mainImg.style.transform = direction === 1 ? 'translateX(-30px)' : 'translateX(30px)';
-    
-    setTimeout(() => {
-      currentIndex += direction;
-      if (currentIndex < 0) currentIndex = images.length - 1;
-      if (currentIndex >= images.length) currentIndex = 0;
-      mainImg.src = images[currentIndex];
-      updateDots();
-      
-      setTimeout(() => {
-        mainImg.style.opacity = '1';
-        mainImg.style.transform = 'translateX(0)';
-      }, 50);
-    }, 300);
+    currentIndex += direction;
+    if (currentIndex < 0) currentIndex = images.length - 1;
+    if (currentIndex >= images.length) currentIndex = 0;
+    mainImg.src = images[currentIndex];
+    updateDots();
   }
 
   function goToSlide(index) {
-    const mainImg = document.getElementById('mainImg');
-    mainImg.style.opacity = '0';
-    mainImg.style.transform = 'translateX(30px)';
-    
-    setTimeout(() => {
-      currentIndex = index;
-      mainImg.src = images[currentIndex];
-      updateDots();
-      
-      setTimeout(() => {
-        mainImg.style.opacity = '1';
-        mainImg.style.transform = 'translateX(0)';
-      }, 50);
-    }, 300);
+    currentIndex = index;
+    mainImg.src = images[currentIndex];
+    updateDots();
   }
 
   // Thumbnail clicks
   thumbs.forEach((thumb, index) => {
     thumb.addEventListener('click', () => {
-      const mainImg = document.getElementById('mainImg');
-      mainImg.style.opacity = '0';
-      mainImg.style.transform = 'translateX(30px)';
-      
-      setTimeout(() => {
-        currentIndex = index;
-        mainImg.src = thumb.dataset.img;
-        updateDots();
-        
-        setTimeout(() => {
-          mainImg.style.opacity = '1';
-          mainImg.style.transform = 'translateX(0)';
-        }, 50);
-      }, 300);
+      currentIndex = index;
+      mainImg.src = thumb.dataset.img;
+      updateDots();
     });
   });
 
