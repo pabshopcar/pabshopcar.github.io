@@ -733,6 +733,21 @@
         bottom:20px;
       }
     }
+
+
+    .view-btn-active {
+  background: linear-gradient(135deg, var(--accent), #2b8fff);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(11,110,255,0.35);
+}
+
+.view-btn-inactive {
+  background: var(--card);
+  color: var(--muted);
+  border: 2px solid var(--border);
+}
+
   </style>
 </head>
 <body>
@@ -752,27 +767,65 @@
   </div>
 </header>
 
-<!-- EXACT COPY FROM HOMEPAGE - Settings Modal -->
+<!-- Settings Modal -->
 <div class="settings-overlay" id="settingsOverlay">
   <div class="settings-modal">
     <div class="settings-header">
       <h2>Settings</h2>
       <button class="close-btn" id="closeSettings">×</button>
     </div>
-    
+
+    <!-- Theme section -->
     <div class="settings-section">
       <h3>Theme Mode</h3>
       <div class="theme-buttons">
         <button class="theme-btn" data-theme="light">
-          <span>☀️</span>
-          <span>Light</span>
+          <span>☀️</span><span>Light</span>
         </button>
         <button class="theme-btn" data-theme="dark">
-          <span>🌙</span>
-          <span>Dark</span>
+          <span>🌙</span><span>Dark</span>
         </button>
       </div>
     </div>
+
+    <!-- Owner login trigger (visible to everyone, opens login form) -->
+<div class="settings-section" id="ownerLoginSection">
+  <h3>Secret</h3>
+  <button id="showOwnerLoginBtn" class="theme-btn" style="width:100%;">Secret</button>
+</div>
+
+    <!-- Admin section -->
+    <div class="settings-section" id="adminSection" style="display:none;">
+      <h3>Admin</h3>
+
+      <div id="authLoggedOut" style="display:none;">
+        <input id="adminEmail" type="email" placeholder="Owner email"
+          style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px;">
+        <input id="adminPassword" type="password" placeholder="Password"
+          style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px;">
+        <button id="loginBtn" class="theme-btn" style="width:100%;">Login</button>
+      </div>
+
+      <div id="authLoggedIn" style="display:none;">
+        <p id="adminEmailLabel" style="color:var(--muted); margin-bottom:12px;"></p>
+        <button id="logoutBtn" class="theme-btn" style="width:100%;">Logout</button>
+
+        <div style="margin-top:14px;">
+                    <button id="viewUserBtn"
+  class="theme-btn view-btn-inactive"
+  style="width:100%;">
+  User view
+</button>
+
+<button id="viewAdminBtn"
+  class="theme-btn view-btn-inactive"
+  style="width:100%; margin-top:10px;">
+  Admin view
+</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -863,7 +916,17 @@
     <!-- ============================================================ -->
     <!-- EDITABLE: Description -->
     <!-- ============================================================ -->
-<div class="description">
+<!-- ADMIN ONLY ACTIONS -->
+<div class="info-card admin-only" id="carAdminActions" style="display:none;">
+  <h3>Admin Actions</h3>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="theme-btn" id="editCarBtn" style="flex:1;">Edit Fields</button>
+    <button class="theme-btn" id="toggleSoldBtn" style="flex:1;">Mark Sold</button>
+    <button class="theme-btn" id="deleteCarBtn" style="flex:1;">Delete</button>
+  </div>
+</div>
+
+    <div class="description">
   <h2>About This Car</h2>
   <p id="carDescription">Loading...</p>
 </div>
@@ -908,7 +971,7 @@
   const closeSettings = document.getElementById('closeSettings');
   
   // Load saved theme
-  const savedTheme = localStorage.getItem('theme') || 'light';
+  const savedTheme = localStorage.getItem('theme') || 'dark';
   root.setAttribute('data-theme', savedTheme);
   
   // Update UI to reflect saved theme
@@ -932,14 +995,15 @@
   };
   
   // Theme buttons
-  document.querySelectorAll('.theme-btn').forEach(btn => {
-    btn.onclick = () => {
-      const theme = btn.dataset.theme;
-      root.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
-      updateThemeButtons();
-    };
-  });
+  document.querySelectorAll('.theme-btn[data-theme]').forEach(btn => {
+  btn.onclick = () => {
+    const theme = btn.dataset.theme;
+    if (!theme) return;
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    updateThemeButtons();
+  };
+});
   
   function updateThemeButtons() {
     const currentTheme = root.getAttribute('data-theme');
@@ -1111,6 +1175,9 @@ const images = Array.from(thumbs).map(t => t.dataset.img);
 <!-------------------GPT------------------>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const PAB_GALLERY = { ... }
+</script>
+<script>
   const SUPABASE_URL = "https://liipbpmjqjqxkuflufkv.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpaXBicG1qcWpxeGt1Zmx1Zmt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MTg0MjYsImV4cCI6MjA4MTQ5NDQyNn0.LrIRgiVCE6E9vyXduQZEkdKAmmLDij2kQN2ajjavTS8";
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1136,6 +1203,7 @@ const images = Array.from(thumbs).map(t => t.dataset.img);
     }
 
     renderCar(data);
+applyAdminView();
   }
 
   function renderCar(car) {
@@ -1178,6 +1246,60 @@ PAB_GALLERY.init(galleryImages);
       else if (label.includes("interior")) valueEl.textContent = car.interior_color ?? "—";
       else if (label.includes("vin")) valueEl.textContent = car.vin ?? "—";
     });
+
+
+
+
+
+
+
+
+
+    // ADMIN BUTTONS (cars.html)
+const isAdmin = window.isAdmin && (localStorage.getItem("viewMode") !== "user");
+
+const adminBox = document.getElementById("carAdminActions");
+if (adminBox) adminBox.style.display = isAdmin ? "" : "none";
+
+const toggleSoldBtn = document.getElementById("toggleSoldBtn");
+if (toggleSoldBtn) toggleSoldBtn.textContent = (car.status === "sold") ? "Unmark Sold" : "Mark Sold";
+
+const toggleBtn = document.getElementById("toggleSoldBtn");
+if (toggleBtn) toggleBtn.onclick = async () => {
+  if (!isAdmin) return;
+
+  const nextStatus = (car.status === "sold") ? "available" : "sold";
+  const ok = confirm(`Set status to "${nextStatus}"?`);
+  if (!ok) return;
+
+  const { error } = await db.from("cars").update({ status: nextStatus }).eq("id", car.id);
+  if (error) { console.error(error); alert("Failed."); return; }
+
+  location.reload();
+};
+
+
+const delBtn = document.getElementById("deleteCarBtn");
+if (delBtn) delBtn.onclick = async () => {
+  if (!isAdmin) return;
+
+  const ok = confirm("Delete this car forever? (no undo)");
+  if (!ok) return;
+
+  const { error } = await db.from("cars").delete().eq("id", car.id);
+  if (error) { console.error(error); alert("Failed."); return; }
+
+  window.location.href = "../index.html#cars";
+};
+
+
+const editBtn = document.getElementById("editCarBtn");
+if (editBtn) editBtn.onclick = () => {
+  if (!isAdmin) return;
+  alert("Next step: inline edit form. We wire that after buttons work.");
+};
+
+
   }
 
   loadCar();
@@ -1270,6 +1392,169 @@ PAB_GALLERY.init(galleryImages);
   // In your renderCar(car), call this at the end:
   // PAB_GALLERY.init(galleryImages);
 </script>
+<!---------------------Admin Start------------->
+<script>
+  // Global flag used later for admin-only UI
+  window.isAdmin = false;
 
+  function $(id){ return document.getElementById(id); }
+
+async function refreshAuthUI() {
+  const { data: { session } } = await db.auth.getSession();
+  window.isAdmin = !!session;
+
+  const adminSection = $("adminSection");
+  const ownerLoginSection = $("ownerLoginSection");
+
+  const outBox = $("authLoggedOut");
+  const inBox  = $("authLoggedIn");
+  const emailLabel = $("adminEmailLabel");
+
+  // If logged in: show admin section, hide "Owner Login" button
+  if (window.isAdmin) {
+    if (adminSection) adminSection.style.display = "";
+    if (ownerLoginSection) ownerLoginSection.style.display = "none";
+  } else {
+    // Logged out: hide admin section (until owner clicks Owner Login)
+    if (adminSection) adminSection.style.display = "none";
+    if (ownerLoginSection) ownerLoginSection.style.display = "";
+  }
+
+  // Logged-in vs logged-out boxes inside admin section
+  if (outBox) outBox.style.display = window.isAdmin ? "none" : "";
+  if (inBox)  inBox.style.display  = window.isAdmin ? "" : "none";
+
+  if (emailLabel && session?.user?.email) {
+    emailLabel.textContent = `Logged in as: ${session.user.email}`;
+  }
+
+  applyAdminView();
+  updateViewButtons();
+}
+
+
+
+  async function loginOwner() {
+    const email = $("adminEmail")?.value?.trim();
+    const password = $("adminPassword")?.value;
+
+    if (!email || !password) {
+      alert("Enter email + password.");
+      return;
+    }
+
+    const { error } = await db.auth.signInWithPassword({ email, password });
+    if (error) {
+      console.error(error);
+      alert("Login failed.");
+      return;
+    }
+
+    await refreshAuthUI();
+  }
+
+  async function logoutOwner() {
+    const { error } = await db.auth.signOut();
+    if (error) console.error(error);
+    await refreshAuthUI();
+  }
+
+  // Wire buttons once DOM exists
+  document.addEventListener("DOMContentLoaded", async () => {
+    $("loginBtn")?.addEventListener("click", loginOwner);
+    $("logoutBtn")?.addEventListener("click", logoutOwner);
+
+    await refreshAuthUI();
+
+    // Keep UI synced if session changes
+    db.auth.onAuthStateChange(() => refreshAuthUI());
+
+    $("showOwnerLoginBtn")?.addEventListener("click", () => {
+  // show admin login form
+  const adminSection = $("adminSection");
+  if (adminSection) adminSection.style.display = "";
+
+  // keep Owner Login button visible or hide it, your choice:
+  $("ownerLoginSection")?.style && ($("ownerLoginSection").style.display = "none");
+
+  // show login box (logged out state)
+  $("authLoggedOut") && ($("authLoggedOut").style.display = "");
+  $("authLoggedIn") && ($("authLoggedIn").style.display = "none");
+});
+
+  });
+
+
+
+
+  function setViewMode(mode) {
+  localStorage.setItem("viewMode", mode);
+  updateViewButtons();
+  applyAdminView();
+}
+
+function getViewMode() {
+  return localStorage.getItem("viewMode") || "admin";
+}
+
+
+
+
+function updateViewButtons() {
+  const mode = getViewMode();
+  const userBtn = document.getElementById("viewUserBtn");
+  const adminBtn = document.getElementById("viewAdminBtn");
+
+  if (!userBtn || !adminBtn) return;
+
+  if (mode === "admin") {
+    adminBtn.classList.add("view-btn-active");
+    adminBtn.classList.remove("view-btn-inactive");
+
+    userBtn.classList.add("view-btn-inactive");
+    userBtn.classList.remove("view-btn-active");
+  } else {
+    userBtn.classList.add("view-btn-active");
+    userBtn.classList.remove("view-btn-inactive");
+
+    adminBtn.classList.add("view-btn-inactive");
+    adminBtn.classList.remove("view-btn-active");
+  }
+}
+
+
+
+
+
+document.getElementById("viewUserBtn")?.addEventListener("click", () => {
+  setViewMode("user");
+});
+
+document.getElementById("viewAdminBtn")?.addEventListener("click", () => {
+  setViewMode("admin");
+});
+
+
+
+
+function applyAdminView() {
+  const mode = getViewMode(); // "admin" or "user"
+  const adminEls = document.querySelectorAll(".admin-only");
+
+  const canSeeAdmin = window.isAdmin && mode === "admin";
+
+  adminEls.forEach(el => {
+    el.style.display = canSeeAdmin ? "" : "none";
+  });
+}
+
+
+
+
+
+updateViewButtons();
+applyAdminView();
+</script>
+<!---------------------Admin End------------->
   </body>
 </html>

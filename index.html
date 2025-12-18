@@ -363,6 +363,47 @@ project-root/
     .card:hover img{transform:scale(1.1)}
     
     .card-body{padding:20px}
+    /* Admin controls on cards */
+.admin-actions{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+
+.admin-actions .admin-btn{
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  font-weight:700;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.admin-actions .admin-btn:hover{
+  border-color:var(--accent);
+}
+
+.admin-actions .danger{
+  border-color:rgba(255,0,0,0.25);
+  color:#ff6b6b;
+}
+
+.admin-actions .danger:hover{
+  border-color:#ff6b6b;
+}
+
+.admin-actions .success{
+  border-color:rgba(16,185,129,0.35);
+  color:#10b981;
+}
+
+.admin-actions .success:hover{
+  border-color:#10b981;
+}
+/* <!----------------f-------> */
     .card h3{
       margin:0 0 10px;
       font-size:20px;
@@ -498,6 +539,20 @@ project-root/
   opacity: 0.5;
 }
 
+
+.view-btn-active {
+  background: linear-gradient(135deg, var(--accent), #2b8fff);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(11,110,255,0.35);
+}
+
+.view-btn-inactive {
+  background: var(--card);
+  color: var(--muted);
+  border: 2px solid var(--border);
+}
+
   </style>
 </head>
 <body>
@@ -523,20 +578,57 @@ project-root/
       <h2>Settings</h2>
       <button class="close-btn" id="closeSettings">×</button>
     </div>
-    
+
+    <!-- Theme section -->
     <div class="settings-section">
       <h3>Theme Mode</h3>
       <div class="theme-buttons">
         <button class="theme-btn" data-theme="light">
-          <span>☀️</span>
-          <span>Light</span>
+          <span>☀️</span><span>Light</span>
         </button>
         <button class="theme-btn" data-theme="dark">
-          <span>🌙</span>
-          <span>Dark</span>
+          <span>🌙</span><span>Dark</span>
         </button>
       </div>
     </div>
+<!-- Owner login trigger (visible to everyone, opens login form) -->
+<div class="settings-section" id="ownerLoginSection">
+  <h3>Secret</h3>
+  <button id="showOwnerLoginBtn" class="theme-btn" style="width:100%;">Secret</button>
+</div>
+
+    <!-- Admin section -->
+    <div class="settings-section" id="adminSection" style="display:none;">
+      <h3>Admin</h3>
+
+      <div id="authLoggedOut" style="display:none;">
+        <input id="adminEmail" type="email" placeholder="Owner email"
+          style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px;">
+        <input id="adminPassword" type="password" placeholder="Password"
+          style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px;">
+        <button id="loginBtn" class="theme-btn" style="width:100%;">Login</button>
+      </div>
+
+      <div id="authLoggedIn" style="display:none;">
+        <p id="adminEmailLabel" style="color:var(--muted); margin-bottom:12px;"></p>
+        <button id="logoutBtn" class="theme-btn" style="width:100%;">Logout</button>
+
+        <div style="margin-top:14px;">
+          <button id="viewUserBtn"
+  class="theme-btn view-btn-inactive"
+  style="width:100%;">
+  User view
+</button>
+
+<button id="viewAdminBtn"
+  class="theme-btn view-btn-inactive"
+  style="width:100%; margin-top:10px;">
+  Admin view
+</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -565,6 +657,24 @@ project-root/
 const SUPABASE_URL = "https://liipbpmjqjqxkuflufkv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpaXBicG1qcWpxeGt1Zmx1Zmt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MTg0MjYsImV4cCI6MjA4MTQ5NDQyNn0.LrIRgiVCE6E9vyXduQZEkdKAmmLDij2kQN2ajjavTS8";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  async function initAdminLink() {
+    const { data: { session } } = await db.auth.getSession();
+
+    const adminSection = document.getElementById("adminSection");
+    const adminLink = document.getElementById("adminLink");
+
+    const isAdmin = !!session;
+
+    if (adminSection) adminSection.style.display = isAdmin ? "" : "none";
+    if (adminLink) adminLink.href = isAdmin ? "admin.html" : "login.html";
+  }
+
+  initAdminLink();
+
+  db.auth.onAuthStateChange(() => {
+    initAdminLink();
+  });
 </script>
 <script>
 async function loadCars() {
@@ -592,22 +702,94 @@ card.addEventListener("click", () => {
     card.classList.add("sold");
   }
 
-  card.innerHTML = `
-    <div class="card-img-wrap">
-      <img src="${car.cover_image}" alt="${car.title}">
+card.innerHTML = `
+  <div class="card-img-wrap">
+    <img src="${car.cover_image || ""}" alt="${car.title || "Car"}" loading="lazy">
+  </div>
+
+  <div class="card-body">
+    <h3>${car.title || "Untitled"}</h3>
+    <div class="price">$${car.price ?? ""}</div>
+    <p>${car.mileage ?? "—"} mi · ${car.history_status || "Clean history"}</p>
+
+    <!-- ADMIN ONLY BUTTONS -->
+    <div class="admin-actions admin-only" style="display:none;">
+      <button class="admin-btn" data-action="edit">Edit</button>
+      <button class="admin-btn success" data-action="sold">${car.status === "sold" ? "Unmark Sold" : "Mark Sold"}</button>
+      <button class="admin-btn danger" data-action="delete">Delete</button>
     </div>
-    <div class="card-body">
-      <h3>${car.title}</h3>
-      <div class="price">$${car.price}</div>
-      <p>${car.mileage} mi · ${car.history_status || "Clean history"}</p>
-    </div>
-  `;
+  </div>
+`;
+
+// Admin button logic (only does something in admin view)
+const actions = card.querySelector(".admin-actions");
+
+if (actions) {
+  actions.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+
+    e.stopPropagation(); // important: prevents card click opening the car page
+
+    // If not admin OR in user view, ignore
+    if (!window.isAdmin || (localStorage.getItem("viewMode") === "user")) return;
+
+    const action = btn.dataset.action;
+
+    if (action === "edit") {
+      // Go to the car detail page, but in admin mode you’ll edit there
+      window.location.href = `cars/cars.html?id=${car.id}`;
+      return;
+    }
+
+    if (action === "sold") {
+      const nextStatus = (car.status === "sold") ? "available" : "sold";
+      const ok = confirm(`Set status to "${nextStatus}"?`);
+      if (!ok) return;
+
+      const { error } = await db
+        .from("cars")
+        .update({ status: nextStatus })
+        .eq("id", car.id);
+
+      if (error) {
+        console.error(error);
+        alert("Failed to update status.");
+        return;
+      }
+
+      // quick refresh
+      location.reload();
+      return;
+    }
+
+    if (action === "delete") {
+      const ok = confirm("Delete this car forever? (no undo)");
+      if (!ok) return;
+
+      const { error } = await db
+        .from("cars")
+        .delete()
+        .eq("id", car.id);
+
+      if (error) {
+        console.error(error);
+        alert("Failed to delete.");
+        return;
+      }
+
+      location.reload();
+    }
+  });
+}
+
 
 
 
   container.insertBefore(card, container.firstChild);
 });
 
+applyAdminView();
 }
 loadCars();
 </script>
@@ -615,6 +797,175 @@ loadCars();
   </div>
 </section>
 
+<!---------------------Admin Start------------------------------------->
+<script>
+  // Global flag used later for admin-only UI
+  window.isAdmin = false;
+
+  function $(id){ return document.getElementById(id); }
+
+async function refreshAuthUI() {
+  const { data: { session } } = await db.auth.getSession();
+  window.isAdmin = !!session;
+
+  const adminSection = $("adminSection");
+  const ownerLoginSection = $("ownerLoginSection");
+
+  const outBox = $("authLoggedOut");
+  const inBox  = $("authLoggedIn");
+  const emailLabel = $("adminEmailLabel");
+
+  // If logged in: show admin section, hide "Owner Login" button
+  if (window.isAdmin) {
+    if (adminSection) adminSection.style.display = "";
+    if (ownerLoginSection) ownerLoginSection.style.display = "none";
+  } else {
+    // Logged out: hide admin section (until owner clicks Owner Login)
+    if (adminSection) adminSection.style.display = "none";
+    if (ownerLoginSection) ownerLoginSection.style.display = "";
+  }
+
+  // Logged-in vs logged-out boxes inside admin section
+  if (outBox) outBox.style.display = window.isAdmin ? "none" : "";
+  if (inBox)  inBox.style.display  = window.isAdmin ? "" : "none";
+
+  if (emailLabel && session?.user?.email) {
+    emailLabel.textContent = `Logged in as: ${session.user.email}`;
+  }
+
+  applyAdminView();
+  updateViewButtons();
+}
+
+
+
+  async function loginOwner() {
+    const email = $("adminEmail")?.value?.trim();
+    const password = $("adminPassword")?.value;
+
+    if (!email || !password) {
+      alert("Enter email + password.");
+      return;
+    }
+
+    const { error } = await db.auth.signInWithPassword({ email, password });
+    if (error) {
+      console.error(error);
+      alert("Login failed.");
+      return;
+    }
+
+    await refreshAuthUI();
+  }
+
+  async function logoutOwner() {
+    const { error } = await db.auth.signOut();
+    if (error) console.error(error);
+    await refreshAuthUI();
+  }
+
+  // Wire buttons once DOM exists
+  document.addEventListener("DOMContentLoaded", async () => {
+    $("loginBtn")?.addEventListener("click", loginOwner);
+    $("logoutBtn")?.addEventListener("click", logoutOwner);
+
+    await refreshAuthUI();
+
+    // Keep UI synced if session changes
+    db.auth.onAuthStateChange(() => refreshAuthUI());
+
+    $("showOwnerLoginBtn")?.addEventListener("click", () => {
+  // show admin login form
+  const adminSection = $("adminSection");
+  if (adminSection) adminSection.style.display = "";
+
+  // keep Owner Login button visible or hide it, your choice:
+  $("ownerLoginSection")?.style && ($("ownerLoginSection").style.display = "none");
+
+  // show login box (logged out state)
+  $("authLoggedOut") && ($("authLoggedOut").style.display = "");
+  $("authLoggedIn") && ($("authLoggedIn").style.display = "none");
+});
+
+  });
+
+
+
+
+
+
+
+
+function setViewMode(mode) {
+  localStorage.setItem("viewMode", mode);
+  updateViewButtons();
+  applyAdminView();
+}
+
+function getViewMode() {
+  return localStorage.getItem("viewMode") || "admin";
+}
+
+
+
+
+function updateViewButtons() {
+  const mode = getViewMode();
+  const userBtn = document.getElementById("viewUserBtn");
+  const adminBtn = document.getElementById("viewAdminBtn");
+
+  if (!userBtn || !adminBtn) return;
+
+  if (mode === "admin") {
+    adminBtn.classList.add("view-btn-active");
+    adminBtn.classList.remove("view-btn-inactive");
+
+    userBtn.classList.add("view-btn-inactive");
+    userBtn.classList.remove("view-btn-active");
+  } else {
+    userBtn.classList.add("view-btn-active");
+    userBtn.classList.remove("view-btn-inactive");
+
+    adminBtn.classList.add("view-btn-inactive");
+    adminBtn.classList.remove("view-btn-active");
+  }
+}
+
+
+
+
+
+document.getElementById("viewUserBtn")?.addEventListener("click", () => {
+  setViewMode("user");
+});
+
+document.getElementById("viewAdminBtn")?.addEventListener("click", () => {
+  setViewMode("admin");
+});
+
+
+
+
+function applyAdminView() {
+  const mode = getViewMode(); // "admin" or "user"
+  const adminEls = document.querySelectorAll(".admin-only");
+
+  const canSeeAdmin = window.isAdmin && mode === "admin";
+
+  adminEls.forEach(el => {
+    el.style.display = canSeeAdmin ? "" : "none";
+  });
+}
+
+
+
+
+
+updateViewButtons();
+applyAdminView();
+
+</script>
+<!---------------------Admin End--------------------------------------->
 <!-- ============================================================ -->
 <!-- EDITABLE: CONTACT INFO -->
 <!-- ============================================================ -->
@@ -641,7 +992,7 @@ loadCars();
   const closeSettings = document.getElementById('closeSettings');
   
   // Load saved theme
-  const savedTheme = localStorage.getItem('theme') || 'light';
+  const savedTheme = localStorage.getItem('theme') || 'dark';
   root.setAttribute('data-theme', savedTheme);
   
   // Update UI to reflect saved theme
@@ -665,14 +1016,16 @@ loadCars();
   };
   
   // Theme buttons
-  document.querySelectorAll('.theme-btn').forEach(btn => {
-    btn.onclick = () => {
-      const theme = btn.dataset.theme;
-      root.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
-      updateThemeButtons();
-    };
-  });
+document.querySelectorAll('.theme-btn[data-theme]').forEach(btn => {
+  btn.onclick = () => {
+    const theme = btn.dataset.theme;
+    if (!theme) return;
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    updateThemeButtons();
+  };
+});
+
   
   function updateThemeButtons() {
     const currentTheme = root.getAttribute('data-theme');
