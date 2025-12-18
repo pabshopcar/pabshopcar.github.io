@@ -434,6 +434,18 @@ project-root/
       box-shadow:0 8px 25px rgba(16,185,129,0.4);
     }
 
+    .contact-btn.secondary{
+  background: var(--card);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.contact-btn.secondary:hover{
+  background: var(--glass);
+  transform: translateY(-3px);
+}
+
     footer{
       text-align:center;
       padding:40px 0;
@@ -612,6 +624,7 @@ loadCars();
   <div class="contact-buttons">
     <a href="tel:+15165657312" class="contact-btn">📞 Call: +1 (516) 565-7312</a> <!-- EDITABLE: Phone -->
     <a href="mailto:sales@pabshop.com" class="contact-btn email">✉️ Email Us</a> <!-- EDITABLE: Email -->
+    <a href="tel:+15857347880" class="contact-btn secondary">📞 Call: +1 (585) 734-7880</a>
   </div>
 </section>
 
