@@ -570,6 +570,12 @@ data.forEach(car => {
   card.className = "card";
   card.setAttribute("data-title", car.title.toLowerCase());
 
+card.style.cursor = "pointer";
+
+card.addEventListener("click", () => {
+  window.location.href = `cars/cars.html?id=${car.id}`;
+});
+
   if (car.status === "sold") {
     card.classList.add("sold");
   }
@@ -585,9 +591,7 @@ data.forEach(car => {
     </div>
   `;
 
-  card.addEventListener("click", () => {
-    window.location.href = `cars.html?id=${car.id}`;
-  });
+
 
   container.insertBefore(card, container.firstChild);
 });
