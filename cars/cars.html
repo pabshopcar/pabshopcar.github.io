@@ -3,13 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>2019 BMW 3 Series — PAB SHOP</title>
-  <meta name="description" content="2019 BMW 3 Series for sale - $28,500">
+  <title>Car — PAB SHOP</title>
+  <meta name="description" content="Car for sale - PAB SHOP">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /* EXACT COPY FROM HOMEPAGE */
     :root{
       --bg:#f6f7fb;
       --card:#ffffff;
@@ -19,14 +18,6 @@
       --glass:rgba(255,255,255,0.65);
       --shadow:0 6px 20px rgba(12,15,20,0.06);
       --border:rgba(0,0,0,0.04);
-      .contact-buttons{
-        flex-direction:column;
-        padding:0 0;
-      }
-      .contact-btn{
-        width:100%;
-        min-width:auto;
-      }
     }
     [data-theme="dark"]{
       --bg:#0b0f16;
@@ -38,7 +29,7 @@
       --shadow:0 10px 30px rgba(0,0,0,0.6);
       --border:rgba(255,255,255,0.03);
     }
-    
+
     *{box-sizing:border-box;margin:0;padding:0}
     body{
       font-family:Inter,system-ui;
@@ -49,164 +40,82 @@
     }
     .container{max-width:1200px;margin:0 auto;padding:0 20px}
 
-    /* EXACT COPY FROM HOMEPAGE */
-    header .container{
-      padding:10px 20px;
-    }
-
+    header .container{ padding:10px 20px; }
     header{
-      position:sticky;
-      top:0;
-      z-index:100;
+      position:sticky; top:0; z-index:100;
       backdrop-filter:blur(12px) saturate(180%);
       background:var(--glass);
       border-bottom:1px solid var(--border);
       transition:all 0.4s ease;
     }
     .header-inner{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:16px 0;
+      display:flex; justify-content:space-between; align-items:center; padding:16px 0;
     }
     .logo{
-      font-weight:700;
-      color:var(--accent);
-      font-size:22px;
-      letter-spacing:-0.5px;
-      text-decoration:none;
+      font-weight:700; color:var(--accent); font-size:22px; letter-spacing:-0.5px; text-decoration:none;
     }
     nav{display:flex;gap:8px;align-items:center}
     nav a{
-      padding:10px 16px;
-      color:var(--muted);
-      text-decoration:none;
-      font-weight:600;
-      border-radius:8px;
-      transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
-      font-size:15px;
+      padding:10px 16px; color:var(--muted); text-decoration:none; font-weight:600;
+      border-radius:8px; transition:all 0.3s cubic-bezier(0.4,0,0.2,1); font-size:15px;
     }
-    nav a:hover{
-      color:var(--text);
-      background:var(--glass);
-      transform:translateY(-1px);
-    }
+    nav a:hover{ color:var(--text); background:var(--glass); transform:translateY(-1px); }
 
-    /* EXACT COPY FROM HOMEPAGE - Settings Toggle */
     .settings-toggle{
       background:var(--card);
       border:1px solid var(--border);
       border-radius:50%;
-      padding:10px;
-      width:44px;
-      height:44px;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      padding:10px; width:44px; height:44px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
       color:var(--text);
       transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
       box-shadow:var(--shadow);
     }
-    .settings-toggle:hover{
-      transform:scale(1.08);
-      box-shadow:0 8px 25px rgba(0,0,0,0.1);
-    }
+    .settings-toggle:hover{ transform:scale(1.08); box-shadow:0 8px 25px rgba(0,0,0,0.1); }
     .settings-toggle:active{transform:scale(0.98)}
     .settings-icon{font-size:20px;transition:transform 0.6s ease}
     .settings-toggle:hover .settings-icon{transform:rotate(90deg)}
 
-    /* EXACT COPY FROM HOMEPAGE - Settings Modal */
     .settings-overlay{
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
+      position:fixed; top:0; left:0; width:100%; height:100%;
       background:rgba(0,0,0,0.5);
       backdrop-filter:blur(4px);
       z-index:1000;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity 0.3s ease;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity 0.3s ease;
     }
-    .settings-overlay.active{
-      opacity:1;
-      pointer-events:all;
-    }
-    
+    .settings-overlay.active{ opacity:1; pointer-events:all; }
     .settings-modal{
       background:var(--card);
       border-radius:20px;
       padding:32px;
       box-shadow:0 20px 60px rgba(0,0,0,0.3);
       border:1px solid var(--border);
-      max-width:500px;
-      width:90%;
+      max-width:500px; width:90%;
       transform:scale(0.8) translateY(-20px);
       transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .settings-overlay.active .settings-modal{
-      transform:scale(1) translateY(0);
-    }
-    
-    .settings-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:28px;
-    }
-    .settings-header h2{
-      font-size:26px;
-      color:var(--text);
-      font-weight:700;
-    }
+    .settings-overlay.active .settings-modal{ transform:scale(1) translateY(0); }
+    .settings-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
+    .settings-header h2{ font-size:26px; color:var(--text); font-weight:700; }
     .close-btn{
-      background:none;
-      border:none;
-      font-size:28px;
-      color:var(--muted);
-      cursor:pointer;
+      background:none; border:none; font-size:28px; color:var(--muted); cursor:pointer;
       transition:all 0.2s ease;
-      width:36px;
-      height:36px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      width:36px; height:36px;
+      display:flex; align-items:center; justify-content:center;
       border-radius:8px;
     }
-    .close-btn:hover{
-      background:var(--glass);
-      color:var(--text);
-      transform:rotate(90deg);
-    }
-    
-    .settings-section{
-      margin-bottom:28px;
-    }
-    .settings-section:last-child{
-      margin-bottom:0;
-    }
+    .close-btn:hover{ background:var(--glass); color:var(--text); transform:rotate(90deg); }
+
+    .settings-section{ margin-bottom:28px; }
+    .settings-section:last-child{ margin-bottom:0; }
     .settings-section h3{
-      font-size:16px;
-      color:var(--text);
-      margin-bottom:14px;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-      opacity:0.8;
+      font-size:16px; color:var(--text); margin-bottom:14px; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;
     }
-    
-    .theme-buttons{
-      display:flex;
-      gap:12px;
-    }
+    .theme-buttons{ display:flex; gap:12px; }
     .theme-btn{
-      flex:1;
-      padding:16px;
+      flex:1; padding:16px;
       border:2px solid var(--border);
       border-radius:12px;
       background:var(--card);
@@ -215,60 +124,30 @@
       font-weight:600;
       font-size:15px;
       color:var(--text);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
+      display:flex; align-items:center; justify-content:center; gap:8px;
     }
-    .theme-btn:hover{
-      transform:translateY(-2px);
-      box-shadow:0 8px 20px rgba(0,0,0,0.1);
-    }
-    .theme-btn.active{
-      border-color:var(--accent);
-      background:var(--accent);
-      color:#fff;
-    }
+    .theme-btn:hover{ transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.1); }
+    .theme-btn.active{ border-color:var(--accent); background:var(--accent); color:#fff; }
 
     .back-link{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      color:var(--muted);
-      text-decoration:none;
-      font-weight:600;
+      display:inline-flex; align-items:center; gap:8px;
+      color:var(--muted); text-decoration:none; font-weight:600;
       margin:30px 0 20px;
-      transition:all 0.3s ease;
-      font-size:15px;
+      transition:all 0.3s ease; font-size:15px;
     }
-    .back-link:hover{
-      color:var(--accent);
-      transform:translateX(-4px);
-    }
+    .back-link:hover{ color:var(--accent); transform:translateX(-4px); }
 
-    .car-detail{
-      padding:20px 0 60px;
-    }
-    
-    .car-header{
-      margin-bottom:40px;
-    }
+    .car-detail{ padding:20px 0 60px; }
+
+    .car-header{ margin-bottom:40px; }
     .car-header h1{
       font-size:clamp(32px,5vw,48px);
       margin:0 0 16px;
       font-weight:700;
       letter-spacing:-1px;
     }
-    .car-price{
-      font-size:36px;
-      color:var(--accent);
-      font-weight:700;
-      margin-bottom:8px;
-    }
-    .car-meta{
-      color:var(--muted);
-      font-size:18px;
-    }
+    .car-price{ font-size:36px; color:var(--accent); font-weight:700; margin-bottom:8px; }
+    .car-meta{ color:var(--muted); font-size:18px; }
 
     .content-grid{
       display:grid;
@@ -293,45 +172,31 @@
       cursor:pointer;
       transition:transform 0.3s ease;
     }
-    
+
     .slider-btn{
-      position:absolute;
-      top:50%;
+      position:absolute; top:50%;
       transform:translateY(-50%);
       background:rgba(255,255,255,0.9);
       border:none;
-      width:50px;
-      height:50px;
+      width:50px; height:50px;
       border-radius:50%;
       cursor:pointer;
       font-size:24px;
       display:none;
-      align-items:center;
-      justify-content:center;
+      align-items:center; justify-content:center;
       transition:all 0.3s ease;
       box-shadow:0 4px 12px rgba(0,0,0,0.15);
       z-index:10;
     }
-    .slider-btn:hover{
-      background:rgba(255,255,255,1);
-      transform:translateY(-50%) scale(1.1);
-    }
-    .slider-btn:active{
-      transform:translateY(-50%) scale(0.95);
-    }
+    .slider-btn:hover{ background:rgba(255,255,255,1); transform:translateY(-50%) scale(1.1); }
+    .slider-btn:active{ transform:translateY(-50%) scale(0.95); }
     .slider-btn.prev{left:15px}
     .slider-btn.next{right:15px}
-    [data-theme="dark"] .slider-btn{
-      background:rgba(255,255,255,0.15);
-      color:#fff;
-    }
-    [data-theme="dark"] .slider-btn:hover{
-      background:rgba(255,255,255,0.25);
-    }
-    
+    [data-theme="dark"] .slider-btn{ background:rgba(255,255,255,0.15); color:#fff; }
+    [data-theme="dark"] .slider-btn:hover{ background:rgba(255,255,255,0.25); }
+
     .slider-dots{
-      position:absolute;
-      top:50%;
+      position:absolute; top:50%;
       transform:translateY(-50%);
       right:20px;
       display:none;
@@ -340,8 +205,7 @@
       z-index:10;
     }
     .dot{
-      width:10px;
-      height:10px;
+      width:10px; height:10px;
       border-radius:50%;
       background:rgba(255,255,255,0.5);
       cursor:pointer;
@@ -352,79 +216,52 @@
       height:24px;
       border-radius:5px;
     }
-    
-    /* Fullscreen modal */
+
+    /* Fullscreen modal (USER VIEW) */
     .fullscreen-overlay{
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
+      position:fixed; top:0; left:0; width:100%; height:100%;
       background:rgba(0,0,0,0.95);
       z-index:2000;
       display:none;
-      align-items:center;
-      justify-content:center;
+      align-items:center; justify-content:center;
       opacity:0;
       transition:opacity 0.3s ease;
     }
-    .fullscreen-overlay.active{
-      display:flex;
-      opacity:1;
-    }
-    .fullscreen-img{
-      max-width:90%;
-      max-height:90%;
-      object-fit:contain;
-    }
+    .fullscreen-overlay.active{ display:flex; opacity:1; }
+    .fullscreen-img{ max-width:90%; max-height:90%; object-fit:contain; }
     .fullscreen-close{
       position:absolute;
-      top:20px;
-      right:30px;
+      top:20px; right:30px;
       font-size:40px;
       color:#fff;
       cursor:pointer;
       background:rgba(0,0,0,0.5);
-      width:50px;
-      height:50px;
+      width:50px; height:50px;
       border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      display:flex; align-items:center; justify-content:center;
       transition:all 0.3s ease;
       border:2px solid rgba(255,255,255,0.3);
       z-index:2001;
     }
-    .fullscreen-close:hover{
-      background:rgba(0,0,0,0.8);
-      transform:rotate(90deg);
-    }
+    .fullscreen-close:hover{ background:rgba(0,0,0,0.8); transform:rotate(90deg); }
     .fullscreen-nav{
       position:absolute;
       top:50%;
       transform:translateY(-50%);
       background:linear-gradient(135deg,var(--accent),#2b8fff);
       border:none;
-      width:60px;
-      height:60px;
+      width:60px; height:60px;
       border-radius:50%;
       cursor:pointer;
       font-size:30px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      display:flex; align-items:center; justify-content:center;
       transition:all 0.3s ease;
       box-shadow:0 4px 15px rgba(11,110,255,0.5);
       z-index:2001;
       color:#fff;
     }
-    .fullscreen-nav:hover{
-      transform:translateY(-50%) scale(1.15);
-      box-shadow:0 8px 25px rgba(11,110,255,0.7);
-    }
-    .fullscreen-nav:active{
-      transform:translateY(-50%) scale(1.05);
-    }
+    .fullscreen-nav:hover{ transform:translateY(-50%) scale(1.15); box-shadow:0 8px 25px rgba(11,110,255,0.7); }
+    .fullscreen-nav:active{ transform:translateY(-50%) scale(1.05); }
     .fullscreen-nav.prev{left:30px}
     .fullscreen-nav.next{right:30px}
     .fullscreen-counter{
@@ -442,7 +279,8 @@
       box-shadow:0 4px 15px rgba(11,110,255,0.5);
       letter-spacing:1px;
     }
-    
+
+    /* Thumbs (saved images only) */
     .thumbs{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -452,31 +290,163 @@
     }
     .thumb{
       aspect-ratio:4/3;
-      border-radius:8px;
+      border-radius:10px;
       overflow:hidden;
       cursor:pointer;
       border:3px solid transparent;
       transition:all 0.3s ease;
+      position:relative;
+      background:var(--card);
     }
-    .thumb:hover{
-      border-color:var(--accent);
+    .thumb:hover{ border-color:var(--accent); transform:scale(1.03); }
+    .thumb.active{ border-color:var(--accent); }
+    .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    /* cover badge on thumb (admin only visibility handled by JS) */
+    .thumb-cover-badge{
+      position:absolute;
+      left:10px; bottom:10px;
+      background:rgba(0,0,0,0.7);
+      color:#fff;
+      padding:6px 10px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:1px;
+      border:1px solid rgba(255,255,255,0.18);
+      display:none;
+      user-select:none;
+    }
+
+    /* pending (selected but not uploaded yet) */
+    .thumb.pending{
+      border-color:rgba(255,77,77,0.6);
+    }
+    .thumb.pending:hover{
+      border-color:rgba(255,77,77,0.9);
+    }
+    .thumb-remove{
+      position:absolute;
+      top:8px; right:8px;
+      width:34px; height:34px;
+      border-radius:10px;
+      border:1px solid rgba(255,77,77,0.35);
+      background:rgba(255,77,77,0.18);
+      color:#ff4d4d;
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900;
+      font-size:16px;
+      box-shadow:0 6px 16px rgba(0,0,0,0.18);
+      display:none; /* admin-only via JS or pending renderer */
+    }
+    .thumb-remove:hover{
+      background:rgba(255,77,77,0.28);
       transform:scale(1.05);
     }
-    .thumb.active{
+
+    /* upload tile (same design as you had) */
+    .admin-upload-tile{
+      aspect-ratio:4/3;
+      border-radius:10px;
+      border:2px dashed var(--border);
+      background:var(--card);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      transition:all 0.25s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .admin-upload-tile:hover{
       border-color:var(--accent);
+      transform:scale(1.03);
+      box-shadow:0 10px 24px rgba(0,0,0,0.12);
     }
-    .thumb img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
+    .admin-upload-tile .icon{
+      width:58px; height:58px;
+      border-radius:18px;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,var(--accent),#2b8fff);
+      color:#fff;
+      font-size:26px;
+      box-shadow:0 10px 28px rgba(11,110,255,0.35);
+    }
+    .admin-upload-tile .label{
+      position:absolute;
+      bottom:10px; left:50%;
+      transform:translateX(-50%);
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      letter-spacing:0.6px;
+      text-transform:uppercase;
+      background:var(--glass);
+      border:1px solid var(--border);
+      padding:5px 10px;
+      border-radius:999px;
+      backdrop-filter: blur(10px);
     }
 
-    .sidebar{
-      display:flex;
-      flex-direction:column;
-      gap:24px;
+    /* upload commit tile (same design as you had) */
+    .admin-commit-tile{
+      aspect-ratio:4/3;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:linear-gradient(135deg,rgba(16,185,129,0.18),rgba(5,150,105,0.10));
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      transition:all 0.25s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .admin-commit-tile:hover{
+      transform:scale(1.03);
+      box-shadow:0 10px 24px rgba(0,0,0,0.12);
+      border-color:rgba(16,185,129,0.35);
+    }
+    .admin-commit-tile .icon{
+      width:58px; height:58px;
+      border-radius:18px;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,#10b981,#059669);
+      color:#fff;
+      font-size:22px;
+      box-shadow:0 10px 28px rgba(16,185,129,0.28);
+    }
+    .admin-commit-tile .label{
+      position:absolute;
+      bottom:10px; left:50%;
+      transform:translateX(-50%);
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:0.6px;
+      text-transform:uppercase;
+      background:var(--glass);
+      border:1px solid var(--border);
+      padding:5px 10px;
+      border-radius:999px;
+      backdrop-filter: blur(10px);
     }
 
+    /* admin-only divider under thumbs */
+    .admin-divider{
+      height:1px;
+      margin:0 20px;
+      background:var(--border);
+    }
+
+    /* admin area uses same thumbs grid look */
+    .admin-tools-row{
+      padding:16px 20px 12px;
+      background:var(--bg);
+    }
+    .admin-pending-row{
+      padding:12px 20px 20px;
+      background:var(--bg);
+    }
+
+    .sidebar{ display:flex; flex-direction:column; gap:24px; }
     .info-card{
       background:var(--card);
       border-radius:16px;
@@ -484,16 +454,9 @@
       box-shadow:var(--shadow);
       border:1px solid var(--border);
     }
-    .info-card h3{
-      margin:0 0 20px;
-      font-size:20px;
-      font-weight:700;
-    }
-    .spec-list{
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-    }
+    .info-card h3{ margin:0 0 20px; font-size:20px; font-weight:700; }
+
+    .spec-list{ display:flex; flex-direction:column; gap:16px; }
     .spec-item{
       display:flex;
       justify-content:space-between;
@@ -501,10 +464,7 @@
       border-bottom:1px solid var(--border);
       align-items:center;
     }
-    .spec-item:last-child{
-      border:0;
-      padding-bottom:0;
-    }
+    .spec-item:last-child{ border:0; padding-bottom:0; }
     .spec-label{
       color:var(--muted);
       font-size:15px;
@@ -519,66 +479,7 @@
       text-align:center;
       opacity:0.9;
     }
-    .spec-value{
-      font-weight:600;
-      text-align:right;
-    }
-
-    .contact-card{
-      background:linear-gradient(135deg,var(--accent),#2b8fff);
-      color:#fff;
-      text-align:center;
-    }
-    .contact-card h3{
-      color:#fff;
-    }
-    .contact-card p{
-      margin:16px 0 24px;
-      opacity:0.95;
-      font-size:15px;
-    }
-    .contact-btn{
-      display:block;
-      width:100%;
-      padding:18px;
-      background:#fff;
-      color:var(--accent);
-      text-align:center;
-      text-decoration:none;
-      font-weight:700;
-      font-size:18px;
-      border-radius:12px;
-      transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
-      box-shadow:0 4px 15px rgba(0,0,0,0.2);
-      margin-bottom:12px;
-    }
-    .contact-btn:hover{
-      transform:translateY(-3px);
-      box-shadow:0 8px 25px rgba(0,0,0,0.3);
-    }
-    .contact-btn:last-child{
-      margin-bottom:0;
-    }
-    .contact-btn.email{
-      background:linear-gradient(135deg,#10b981,#059669);
-      color:#fff;
-      box-shadow:0 4px 15px rgba(16,185,129,0.3);
-    }
-    .contact-btn.email:hover{
-      box-shadow:0 8px 25px rgba(16,185,129,0.4);
-    }
-
-    .contact-btn.secondary{
-  background: var(--card);
-  color: var(--accent);
-  border: 2px solid var(--accent);
-  box-shadow: var(--shadow);
-}
-
-.contact-btn.secondary:hover{
-  background: var(--glass);
-  transform: translateY(-3px);
-}
+    .spec-value{ font-weight:600; text-align:right; }
 
     .description{
       background:var(--card);
@@ -588,43 +489,12 @@
       border:1px solid var(--border);
       margin-bottom:40px;
     }
-    .description h2{
-      margin:0 0 20px;
-      font-size:28px;
-      font-weight:700;
-    }
-    .description p{
-      color:var(--muted);
-      font-size:16px;
-      line-height:1.8;
-      margin-bottom:16px;
-    }
-    .description ul{
-      margin:20px 0;
-      padding-left:20px;
-    }
-    .description li{
-      color:var(--muted);
-      margin-bottom:10px;
-      line-height:1.8;
-    }
+    .description h2{ margin:0 0 20px; font-size:28px; font-weight:700; }
+    .description p{ color:var(--muted); font-size:16px; line-height:1.8; margin-bottom:16px; }
 
-    #contact{
-      padding:60px 0;
-      text-align:center;
-    }
-    #contact h2{
-      color:var(--text);
-      margin-bottom:16px;
-      font-size:32px;
-      font-weight:700;
-    }
-    #contact p{
-      color:var(--muted);
-      font-size:16px;
-      margin-bottom:24px;
-    }
-    
+    #contact{ padding:60px 0; text-align:center; }
+    #contact h2{ color:var(--text); margin-bottom:16px; font-size:32px; font-weight:700; }
+    #contact p{ color:var(--muted); font-size:16px; margin-bottom:24px; }
     .contact-buttons{
       display:flex;
       gap:16px;
@@ -649,17 +519,19 @@
       width:100%;
       min-width:auto;
     }
-    .contact-btn:hover{
-      transform:translateY(-3px);
-      box-shadow:0 8px 25px rgba(11,110,255,0.4);
-    }
+    .contact-btn:hover{ transform:translateY(-3px); box-shadow:0 8px 25px rgba(11,110,255,0.4); }
     .contact-btn.email{
       background:linear-gradient(135deg,#10b981,#059669);
       box-shadow:0 4px 15px rgba(16,185,129,0.3);
     }
-    .contact-btn.email:hover{
-      box-shadow:0 8px 25px rgba(16,185,129,0.4);
+    .contact-btn.email:hover{ box-shadow:0 8px 25px rgba(16,185,129,0.4); }
+    .contact-btn.secondary{
+      background: var(--card);
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      box-shadow: var(--shadow);
     }
+    .contact-btn.secondary:hover{ background: var(--glass); transform: translateY(-3px); }
 
     footer{
       text-align:center;
@@ -670,45 +542,133 @@
       font-size:14px;
     }
 
-    @media(max-width:968px){
-      .content-grid{
-        grid-template-columns:1fr;
-      }
-      .main-img{
-        height:400px;
-      }
+    /* admin view buttons */
+    .view-btn-active{
+      background: linear-gradient(135deg, var(--accent), #2b8fff);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 6px 18px rgba(11,110,255,0.35);
+    }
+    .view-btn-inactive{
+      background: var(--card);
+      color: var(--muted);
+      border: 2px solid var(--border);
     }
 
-    /* EXACT COPY FROM HOMEPAGE */
+    /* Admin Photo Modal (not fullscreen) */
+    .admin-photo-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+      backdrop-filter:blur(3px);
+      z-index:3000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .admin-photo-modal{
+      width:min(920px,95vw);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      position:relative;
+    }
+    .admin-photo-close{
+      position:absolute;
+      top:10px; right:12px;
+      width:38px; height:38px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--glass);
+      color:var(--text);
+      font-size:24px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .admin-photo-wrap{
+      position:relative;
+      background:var(--bg);
+      border-radius:14px;
+      border:1px solid var(--border);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      max-height:70vh;
+    }
+    .admin-photo-wrap img{
+      width:100%;
+      height:auto;
+      max-height:70vh;
+      object-fit:contain;
+    }
+    .admin-photo-delete{
+      position:absolute;
+      top:12px; right:12px;
+      width:46px; height:46px;
+      border-radius:14px;
+      border:1px solid rgba(255,77,77,0.35);
+      background:rgba(255,77,77,0.18);
+      color:#ff4d4d;
+      cursor:pointer;
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 10px 24px rgba(0,0,0,0.22);
+    }
+    .admin-photo-delete:hover{ background:rgba(255,77,77,0.28); transform:scale(1.05); }
+    .admin-photo-cover{
+      position:absolute;
+      left:12px; bottom:12px;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:linear-gradient(135deg,var(--accent),#2b8fff);
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 10px 24px rgba(11,110,255,0.25);
+    }
+    .admin-photo-cover:hover{ transform:scale(1.03); }
+    .admin-cover-badge{
+      position:absolute;
+      left:12px; top:12px;
+      background:rgba(0,0,0,0.70);
+      color:#fff;
+      padding:6px 10px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:1px;
+      border:1px solid rgba(255,255,255,0.18);
+      display:none;
+      user-select:none;
+    }
+
+    @media(max-width:968px){
+      .content-grid{ grid-template-columns:1fr; }
+      .main-img{ height:400px; }
+    }
     @media(max-width:768px){
       .header-inner{padding:12px 0}
-      nav{
-        display:flex;
-        flex-wrap:wrap;
-        justify-content:center;
-        gap:6px;
-      }
-      nav a{
-        padding:8px 14px;
-        font-size:14px;
-      }
+      nav{display:flex; flex-wrap:wrap; justify-content:center; gap:6px;}
+      nav a{padding:8px 14px; font-size:14px;}
       .car-price{font-size:28px}
       .main-img{height:350px}
-      .thumbs{
-        grid-template-columns:repeat(3,1fr);
-        gap:8px;
-        padding:12px;
-      }
-      .description{
-        padding:24px;
-      }
-      .settings-modal{padding:24px}
-      .slider-dots{
-        right:10px;
-      }
+      .thumbs{ grid-template-columns:repeat(3,1fr); gap:8px; padding:12px; }
+      .admin-divider{ margin:0 12px; }
+      .admin-tools-row{ padding:12px 12px 10px; }
+      .admin-pending-row{ padding:10px 12px 14px; }
+      .description{ padding:24px; }
+      .settings-modal{ padding:24px }
+      .slider-dots{ right:10px; }
     }
-
-    /* EXACT COPY FROM HOMEPAGE */
     @media(max-width:480px){
       .logo{font-size:20px}
       .settings-toggle{padding:8px;width:40px;height:40px}
@@ -717,42 +677,17 @@
       .slider-btn.prev{left:10px}
       .slider-btn.next{right:10px}
       .main-img{height:300px}
-      .thumbs{
-        grid-template-columns:repeat(2,1fr);
-      }
-      .fullscreen-nav{
-        width:45px;
-        height:45px;
-        font-size:24px;
-      }
+      .thumbs{ grid-template-columns:repeat(2,1fr); }
+      .fullscreen-nav{ width:45px; height:45px; font-size:24px; }
       .fullscreen-nav.prev{left:15px}
       .fullscreen-nav.next{right:15px}
-      .fullscreen-counter{
-        font-size:14px;
-        padding:10px 20px;
-        bottom:20px;
-      }
+      .fullscreen-counter{ font-size:14px; padding:10px 20px; bottom:20px; }
     }
-
-
-    .view-btn-active {
-  background: linear-gradient(135deg, var(--accent), #2b8fff);
-  color: #fff;
-  border-color: transparent;
-  box-shadow: 0 6px 18px rgba(11,110,255,0.35);
-}
-
-.view-btn-inactive {
-  background: var(--card);
-  color: var(--muted);
-  border: 2px solid var(--border);
-}
-
   </style>
 </head>
+
 <body>
 
-<!-- EXACT COPY FROM HOMEPAGE -->
 <header>
   <div class="container header-inner">
     <a href="../index.html" class="logo">PAB SHOP</a>
@@ -775,24 +710,19 @@
       <button class="close-btn" id="closeSettings">×</button>
     </div>
 
-    <!-- Theme section -->
     <div class="settings-section">
       <h3>Theme Mode</h3>
       <div class="theme-buttons">
-        <button class="theme-btn" data-theme="light">
-          <span>☀️</span><span>Light</span>
-        </button>
-        <button class="theme-btn" data-theme="dark">
-          <span>🌙</span><span>Dark</span>
-        </button>
+        <button class="theme-btn" data-theme="light"><span>☀️</span><span>Light</span></button>
+        <button class="theme-btn" data-theme="dark"><span>🌙</span><span>Dark</span></button>
       </div>
     </div>
 
-    <!-- Owner login trigger (visible to everyone, opens login form) -->
-<div class="settings-section" id="ownerLoginSection">
-  <h3>Secret</h3>
-  <button id="showOwnerLoginBtn" class="theme-btn" style="width:100%;">Secret</button>
-</div>
+    <!-- Owner login trigger -->
+    <div class="settings-section" id="ownerLoginSection">
+      <h3>Secret</h3>
+      <button id="showOwnerLoginBtn" class="theme-btn" style="width:100%;">Secret</button>
+    </div>
 
     <!-- Admin section -->
     <div class="settings-section" id="adminSection" style="display:none;">
@@ -811,21 +741,11 @@
         <button id="logoutBtn" class="theme-btn" style="width:100%;">Logout</button>
 
         <div style="margin-top:14px;">
-                    <button id="viewUserBtn"
-  class="theme-btn view-btn-inactive"
-  style="width:100%;">
-  User view
-</button>
-
-<button id="viewAdminBtn"
-  class="theme-btn view-btn-inactive"
-  style="width:100%; margin-top:10px;">
-  Admin view
-</button>
+          <button id="viewUserBtn" class="theme-btn view-btn-inactive" style="width:100%;">User view</button>
+          <button id="viewAdminBtn" class="theme-btn view-btn-inactive" style="width:100%; margin-top:10px;">Admin view</button>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -833,9 +753,6 @@
   <a href="../index.html#cars" class="back-link">← Back to all cars</a>
 
   <section class="car-detail">
-    <!-- ============================================================ -->
-    <!-- EDITABLE: Car Header -->
-    <!-- ============================================================ -->
     <div class="car-header">
       <h1>Loading...</h1>
       <div class="car-price">Loading...</div>
@@ -843,28 +760,35 @@
     </div>
 
     <div class="content-grid">
-      <!-- Gallery Section with slider -->
       <div class="gallery">
-        <img id="mainImg" class="main-img" src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&h=600&fit=crop" alt="Main car image">
-        
+        <img id="mainImg" class="main-img"
+          src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&h=600&fit=crop"
+          alt="Main car image">
+
         <button class="slider-btn prev" onclick="changeSlide(-1)">‹</button>
         <button class="slider-btn next" onclick="changeSlide(1)">›</button>
-        
+
         <div class="slider-dots" id="sliderDots"></div>
-        
-        <div class="thumbs">
-          <!-- BMW 3 Series images -->
-          <div class="thumb active" data-img="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&h=600&fit=crop">
-            <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=300&h=200&fit=crop" alt="Front view">
+
+        <!-- SAVED thumbs only -->
+        <div class="thumbs" id="thumbs">
+          <!-- populated dynamically -->
+          <div class="thumb active" data-idx="0" data-img="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&h=600&fit=crop">
+            <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=300&h=200&fit=crop" alt="Photo 1">
+            <div class="thumb-cover-badge">COVER</div>
           </div>
+        </div>
+
+        <!-- ADMIN only: divider + tools + pending previews (below saved thumbs) -->
+        <div class="admin-divider admin-only" id="adminDivider" style="display:none;"></div>
+
+        <div class="admin-only" id="adminUploadsArea" style="display:none;">
+          <div class="thumbs admin-tools-row" id="adminToolsRow"></div>
+          <div class="thumbs admin-pending-row" id="adminPendingRow"></div>
         </div>
       </div>
 
-      <!-- Sidebar -->
       <div class="sidebar">
-        <!-- ============================================================ -->
-        <!-- EDITABLE: Specifications -->
-        <!-- ============================================================ -->
         <div class="info-card">
           <h3>Specifications</h3>
           <div class="spec-list">
@@ -913,41 +837,22 @@
       </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- EDITABLE: Description -->
-    <!-- ============================================================ -->
-<!-- ADMIN ONLY ACTIONS -->
-<div class="info-card admin-only" id="carAdminActions" style="display:none;">
-  <h3>Admin Actions</h3>
-  <div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <button class="theme-btn" id="editCarBtn" style="flex:1;">Edit Fields</button>
-    <button class="theme-btn" id="toggleSoldBtn" style="flex:1;">Mark Sold</button>
-    <button class="theme-btn" id="deleteCarBtn" style="flex:1;">Delete</button>
-  </div>
-</div>
-<!-- ADMIN ONLY: IMAGE UPLOAD -->
-<div class="info-card admin-only" id="carUploadBox" style="display:none;">
-  <h3>Upload Photos</h3>
-
-  <input id="photoInput" type="file" accept="image/*" multiple
-    style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); margin-bottom:12px;">
-
-  <button class="theme-btn" id="uploadPhotosBtn" style="width:100%;">Upload Selected Photos</button>
-
-  <p id="uploadStatus" style="color:var(--muted); margin-top:12px;"></p>
-</div>
+    <!-- ADMIN ONLY ACTIONS -->
+    <div class="info-card admin-only" id="carAdminActions" style="display:none;">
+      <h3>Admin Actions</h3>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="theme-btn" id="editCarBtn" style="flex:1;">Edit Fields</button>
+        <button class="theme-btn" id="toggleSoldBtn" style="flex:1;">Mark Sold</button>
+        <button class="theme-btn" id="deleteCarBtn" style="flex:1;">Delete</button>
+      </div>
+    </div>
 
     <div class="description">
-  <h2>About This Car</h2>
-  <p id="carDescription">Loading...</p>
-</div>
-
-
+      <h2>About This Car</h2>
+      <p id="carDescription">Loading...</p>
+    </div>
   </section>
 
-  <!-- ============================================================ -->
-  <!-- CONTACT SECTION - EXACT COPY FROM INDEX.HTML -->
-  <!-- ============================================================ -->
   <section id="contact" class="container">
     <h2>Contact Us</h2>
     <p>Contact us for more information</p>
@@ -959,13 +864,30 @@
   </section>
 </div>
 
-<!-- Fullscreen Image Viewer -->
+<!-- Fullscreen Image Viewer (USER VIEW) -->
 <div class="fullscreen-overlay" id="fullscreenOverlay">
   <span class="fullscreen-close" id="fullscreenClose">×</span>
   <button class="fullscreen-nav prev" id="fullscreenPrev">‹</button>
   <button class="fullscreen-nav next" id="fullscreenNext">›</button>
-  <div class="fullscreen-counter" id="fullscreenCounter">1 / 10</div>
+  <div class="fullscreen-counter" id="fullscreenCounter">1 / 1</div>
   <img id="fullscreenImg" class="fullscreen-img" src="" alt="Fullscreen view">
+</div>
+
+<!-- Admin Photo Preview Modal (NOT fullscreen) -->
+<div class="admin-photo-overlay admin-only" id="adminPhotoOverlay">
+  <div class="admin-photo-modal">
+    <button class="admin-photo-close" id="adminPhotoClose">×</button>
+
+    <div class="admin-photo-wrap">
+      <img id="adminPhotoImg" src="" alt="Preview">
+      <div class="admin-cover-badge" id="adminCoverBadge">COVER</div>
+
+      <button class="admin-photo-delete" id="adminDeleteBtn" title="Delete">🗑</button>
+      <button class="admin-photo-cover" id="adminCoverBtn" title="Set as cover">Set as cover</button>
+    </div>
+
+    <p id="adminPhotoStatus" style="color:var(--muted); margin-top:12px;"></p>
+  </div>
 </div>
 
 <footer>
@@ -974,330 +896,711 @@
   </div>
 </footer>
 
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-  // EXACT COPY FROM HOMEPAGE - Settings functionality
+  /**********************
+   * Settings (unchanged)
+   **********************/
   const root = document.documentElement;
   const settingsToggle = document.getElementById('settingsToggle');
   const settingsOverlay = document.getElementById('settingsOverlay');
   const closeSettings = document.getElementById('closeSettings');
-  
-  // Load saved theme
+
   const savedTheme = localStorage.getItem('theme') || 'dark';
   root.setAttribute('data-theme', savedTheme);
-  
-  // Update UI to reflect saved theme
   updateThemeButtons();
-  
-  // Open settings
-  settingsToggle.onclick = () => {
-    settingsOverlay.classList.add('active');
-  };
-  
-  // Close settings
-  closeSettings.onclick = () => {
-    settingsOverlay.classList.remove('active');
-  };
-  
-  // Close on overlay click
-  settingsOverlay.onclick = (e) => {
-    if (e.target === settingsOverlay) {
-      settingsOverlay.classList.remove('active');
-    }
-  };
-  
-  // Theme buttons
+
+  settingsToggle.onclick = () => settingsOverlay.classList.add('active');
+  closeSettings.onclick = () => settingsOverlay.classList.remove('active');
+  settingsOverlay.onclick = (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.remove('active'); };
+
   document.querySelectorAll('.theme-btn[data-theme]').forEach(btn => {
-  btn.onclick = () => {
-    const theme = btn.dataset.theme;
-    if (!theme) return;
-    root.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-    updateThemeButtons();
-  };
-});
-  
+    btn.onclick = () => {
+      const theme = btn.dataset.theme;
+      if (!theme) return;
+      root.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      updateThemeButtons();
+    };
+  });
+
   function updateThemeButtons() {
     const currentTheme = root.getAttribute('data-theme');
     document.querySelectorAll('.theme-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.theme === currentTheme);
     });
   }
-
-  // Image slider functionality
-  const mainImg=document.getElementById('mainImg');
- const thumbs=document.querySelectorAll('.thumb');
-const images = Array.from(thumbs).map(t => t.dataset.img);
-
-  let currentIndex = 0;
-
-  // Create dots
-  const dotsContainer = document.getElementById('sliderDots');
-  images.forEach((_, index) => {
-    const dot = document.createElement('div');
-    dot.className = 'dot' + (index === 0 ? ' active' : '');
-    dot.onclick = () => goToSlide(index);
-    dotsContainer.appendChild(dot);
-  });
-
-  function updateDots() {
-    document.querySelectorAll('.dot').forEach((dot, index) => {
-      dot.className = 'dot' + (index === currentIndex ? ' active' : '');
-    });
-    thumbs.forEach((thumb, index) => {
-      thumb.className = 'thumb' + (index === currentIndex ? ' active' : '');
-    });
-  }
-
-  function changeSlide(direction) {
-    currentIndex += direction;
-    if (currentIndex < 0) currentIndex = images.length - 1;
-    if (currentIndex >= images.length) currentIndex = 0;
-    mainImg.src = images[currentIndex];
-    updateDots();
-  }
-
-  function goToSlide(index) {
-    currentIndex = index;
-    mainImg.src = images[currentIndex];
-    updateDots();
-  }
-
-  // Thumbnail clicks
-  thumbs.forEach((thumb, index) => {
-    thumb.addEventListener('click', () => {
-      currentIndex = index;
-      mainImg.src = thumb.dataset.img;
-      updateDots();
-    });
-  });
-
-  // Click main image to open fullscreen
-  mainImg.addEventListener('click', () => {
-    fullscreenIndex = currentIndex;
-    document.getElementById('fullscreenImg').src = images[fullscreenIndex];
-    document.getElementById('fullscreenCounter').textContent = `${fullscreenIndex + 1} / ${images.length}`;
-    document.getElementById('fullscreenOverlay').classList.add('active');
-  });
-
-  // Fullscreen navigation
-  let fullscreenIndex = 0;
-
-  document.getElementById('fullscreenPrev').addEventListener('click', (e) => {
-    e.stopPropagation();
-    fullscreenIndex--;
-    if (fullscreenIndex < 0) fullscreenIndex = images.length - 1;
-    document.getElementById('fullscreenImg').src = images[fullscreenIndex];
-    document.getElementById('fullscreenCounter').textContent = `${fullscreenIndex + 1} / ${images.length}`;
-  });
-
-  document.getElementById('fullscreenNext').addEventListener('click', (e) => {
-    e.stopPropagation();
-    fullscreenIndex++;
-    if (fullscreenIndex >= images.length) fullscreenIndex = 0;
-    document.getElementById('fullscreenImg').src = images[fullscreenIndex];
-    document.getElementById('fullscreenCounter').textContent = `${fullscreenIndex + 1} / ${images.length}`;
-  });
-
-  // Close fullscreen
-  document.getElementById('fullscreenClose').addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.getElementById('fullscreenOverlay').classList.remove('active');
-  });
-
-  // Close fullscreen on overlay click
-  document.getElementById('fullscreenOverlay').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('fullscreenOverlay')) {
-      document.getElementById('fullscreenOverlay').classList.remove('active');
-    }
-  });
-
-  // Keyboard navigation in fullscreen
-  document.addEventListener('keydown', (e) => {
-    if (document.getElementById('fullscreenOverlay').classList.contains('active')) {
-      if (e.key === 'ArrowLeft') {
-        fullscreenIndex--;
-        if (fullscreenIndex < 0) fullscreenIndex = images.length - 1;
-        document.getElementById('fullscreenImg').src = images[fullscreenIndex];
-        document.getElementById('fullscreenCounter').textContent = `${fullscreenIndex + 1} / ${images.length}`;
-      }
-      if (e.key === 'ArrowRight') {
-        fullscreenIndex++;
-        if (fullscreenIndex >= images.length) fullscreenIndex = 0;
-        document.getElementById('fullscreenImg').src = images[fullscreenIndex];
-        document.getElementById('fullscreenCounter').textContent = `${fullscreenIndex + 1} / ${images.length}`;
-      }
-      if (e.key === 'Escape') {
-        document.getElementById('fullscreenOverlay').classList.remove('active');
-      }
-    }
-  });
-
-  // Fullscreen swipe support
-  let fullscreenTouchStartX = 0;
-  let fullscreenTouchEndX = 0;
-  const fullscreenOverlay = document.getElementById('fullscreenOverlay');
-
-  fullscreenOverlay.addEventListener('touchstart', e => {
-    fullscreenTouchStartX = e.changedTouches[0].screenX;
-  });
-
-  fullscreenOverlay.addEventListener('touchend', e => {
-    fullscreenTouchEndX = e.changedTouches[0].screenX;
-    handleFullscreenSwipe();
-  });
-
-  function handleFullscreenSwipe() {
-    if (fullscreenTouchEndX < fullscreenTouchStartX - 50) {
-      // Swipe left - next image
-      fullscreenIndex++;
-      if (fullscreenIndex >= images.length) fullscreenIndex = 0;
-      document.getElementById('fullscreenImg').src = images[fullscreenIndex];
-      document.getElementById('fullscreenCounter').textContent = `${fullscreenIndex + 1} / ${images.length}`;
-    }
-    if (fullscreenTouchEndX > fullscreenTouchStartX + 50) {
-      // Swipe right - previous image
-      fullscreenIndex--;
-      if (fullscreenIndex < 0) fullscreenIndex = images.length - 1;
-      document.getElementById('fullscreenImg').src = images[fullscreenIndex];
-      document.getElementById('fullscreenCounter').textContent = `${fullscreenIndex + 1} / ${images.length}`;
-    }
-  }
-
-  // Touch swipe support
-  let touchStartX = 0;
-  let touchEndX = 0;
-  const gallery = document.querySelector('.gallery');
-
-  gallery.addEventListener('touchstart', e => {
-    touchStartX = e.changedTouches[0].screenX;
-  });
-
-  gallery.addEventListener('touchend', e => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-  });
-
-  function handleSwipe() {
-    if (touchEndX < touchStartX - 50) changeSlide(1);
-    if (touchEndX > touchStartX + 50) changeSlide(-1);
-  }
 </script>
 
-<!-------------------GPT------------------>
-<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
+  /**********************
+   * Supabase
+   **********************/
   const SUPABASE_URL = "https://liipbpmjqjqxkuflufkv.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpaXBicG1qcWpxeGt1Zmx1Zmt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MTg0MjYsImV4cCI6MjA4MTQ5NDQyNn0.LrIRgiVCE6E9vyXduQZEkdKAmmLDij2kQN2ajjavTS8";
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // =========================
-// PHASE 2: UPLOAD HELPERS
-// =========================
-async function compressImage(file) {
-  const options = {
-    maxSizeMB: 0.45,
-    maxWidthOrHeight: 1920,
-    useWebWorker: true
-  };
-  return await imageCompression(file, options);
-}
+  window.isAdmin = false;
+  function $(id){ return document.getElementById(id); }
 
-function getPublicUrl(path) {
-  const { data } = db.storage.from("cars").getPublicUrl(path);
-  return data.publicUrl;
-}
+  function getViewMode(){ return localStorage.getItem("viewMode") || "admin"; }
+  function setViewMode(mode){
+    localStorage.setItem("viewMode", mode);
+    updateViewButtons();
+    applyAdminView();
+    // update admin section (tiles + pending)
+    PAB_GALLERY.injectAdminThumbTiles();
+    PAB_GALLERY.renderPendingThumbs();
+    PAB_GALLERY.updateCoverBadges();
+  }
+  function canSeeAdminNow(){
+    return window.isAdmin && (getViewMode() !== "user");
+  }
 
-async function uploadPhotosForCar(carId, files) {
-  const uploadedUrls = [];
+  function updateViewButtons(){
+    const mode = getViewMode();
+    const userBtn = $("viewUserBtn");
+    const adminBtn = $("viewAdminBtn");
+    if (!userBtn || !adminBtn) return;
 
-  for (const file of files) {
-    const compressed = await compressImage(file);
-    const safeName = (compressed.name || "photo.jpg").replace(/\s+/g, "_");
-    const path = `${carId}/${Date.now()}_${safeName}`;
+    if (mode === "admin"){
+      adminBtn.classList.add("view-btn-active");
+      adminBtn.classList.remove("view-btn-inactive");
+      userBtn.classList.add("view-btn-inactive");
+      userBtn.classList.remove("view-btn-active");
+    } else {
+      userBtn.classList.add("view-btn-active");
+      userBtn.classList.remove("view-btn-inactive");
+      adminBtn.classList.add("view-btn-inactive");
+      adminBtn.classList.remove("view-btn-active");
+    }
+  }
 
-    const { error } = await db.storage
-      .from("cars")
-      .upload(path, compressed, {
+  function applyAdminView(){
+    const adminEls = document.querySelectorAll(".admin-only");
+    const canSee = canSeeAdminNow();
+    adminEls.forEach(el => { el.style.display = canSee ? "" : "none"; });
+
+    const adminBox = $("carAdminActions");
+    if (adminBox) adminBox.style.display = canSee ? "" : "none";
+  }
+
+  async function refreshAuthUI(){
+    const { data: { session } } = await db.auth.getSession();
+    window.isAdmin = !!session;
+
+    const adminSection = $("adminSection");
+    const ownerLoginSection = $("ownerLoginSection");
+
+    const outBox = $("authLoggedOut");
+    const inBox  = $("authLoggedIn");
+    const emailLabel = $("adminEmailLabel");
+
+    if (window.isAdmin){
+      if (adminSection) adminSection.style.display = "";
+      if (ownerLoginSection) ownerLoginSection.style.display = "none";
+    } else {
+      if (adminSection) adminSection.style.display = "none";
+      if (ownerLoginSection) ownerLoginSection.style.display = "";
+    }
+
+    if (outBox) outBox.style.display = window.isAdmin ? "none" : "";
+    if (inBox)  inBox.style.display  = window.isAdmin ? "" : "none";
+
+    if (emailLabel && session?.user?.email){
+      emailLabel.textContent = `Logged in as: ${session.user.email}`;
+    }
+
+    applyAdminView();
+    updateViewButtons();
+  }
+
+  async function loginOwner(){
+    const email = $("adminEmail")?.value?.trim();
+    const password = $("adminPassword")?.value;
+    if (!email || !password) return alert("Enter email + password.");
+    const { error } = await db.auth.signInWithPassword({ email, password });
+    if (error){ console.error(error); return alert("Login failed."); }
+    await refreshAuthUI();
+    PAB_GALLERY.injectAdminThumbTiles();
+    PAB_GALLERY.renderPendingThumbs();
+    PAB_GALLERY.updateCoverBadges();
+  }
+
+  async function logoutOwner(){
+    const { error } = await db.auth.signOut();
+    if (error) console.error(error);
+    await refreshAuthUI();
+    PAB_GALLERY.injectAdminThumbTiles();
+    PAB_GALLERY.renderPendingThumbs();
+    PAB_GALLERY.updateCoverBadges();
+  }
+
+  /**********************
+   * Storage helpers
+   **********************/
+  async function compressImage(file){
+    const options = { maxSizeMB: 0.45, maxWidthOrHeight: 1920, useWebWorker: true };
+    return await imageCompression(file, options);
+  }
+  function getPublicUrl(path){
+    const { data } = db.storage.from("cars").getPublicUrl(path);
+    return data.publicUrl;
+  }
+  async function uploadPhotosForCar(carId, files){
+    const uploadedUrls = [];
+    for (const file of files){
+      const compressed = await compressImage(file);
+      const safeName = (compressed.name || "photo.jpg").replace(/\s+/g, "_");
+      const path = `${carId}/${Date.now()}_${safeName}`;
+
+      const { error } = await db.storage.from("cars").upload(path, compressed, {
         cacheControl: "3600",
         upsert: false,
-        contentType: compressed.type || "image/jpeg"
+        contentType: compressed.type || "image/jpeg",
+      });
+      if (error) throw error;
+
+      uploadedUrls.push(getPublicUrl(path));
+    }
+    return uploadedUrls;
+  }
+  async function saveCarImages(carId, newUrls){
+    const existing = Array.isArray(window.currentCar?.images) ? window.currentCar.images : [];
+    const merged = [...existing, ...newUrls];
+    const { error } = await db.from("cars").update({ images: merged }).eq("id", carId);
+    if (error) throw error;
+  }
+
+  function urlToStoragePath(url){
+    const marker = "/storage/v1/object/public/cars/";
+    const idx = url.indexOf(marker);
+    if (idx === -1) return null;
+    return url.substring(idx + marker.length);
+  }
+  async function setCoverImage(carId, url){
+    const { error } = await db.from("cars").update({ cover_image: url }).eq("id", carId);
+    if (error) throw error;
+  }
+  async function deleteCarImage(carId, url){
+    const path = urlToStoragePath(url);
+    if (path){
+      const { error: storageErr } = await db.storage.from("cars").remove([path]);
+      if (storageErr) throw storageErr;
+    }
+
+    const car = window.currentCar;
+    const existing = Array.isArray(car?.images) ? car.images : [];
+    const nextImages = existing.filter(x => x !== url);
+
+    const updatePayload = { images: nextImages };
+    if (car?.cover_image === url){
+      updatePayload.cover_image = nextImages[0] || null;
+    }
+
+    const { error: dbErr } = await db.from("cars").update(updatePayload).eq("id", carId);
+    if (dbErr) throw dbErr;
+  }
+
+  /**********************
+   * Admin modal actions
+   **********************/
+  function openAdminPhotoModal(url){
+    if (!canSeeAdminNow()) return;
+    const overlay = $("adminPhotoOverlay");
+    const img = $("adminPhotoImg");
+    const status = $("adminPhotoStatus");
+    const badge = $("adminCoverBadge");
+    const coverBtn = $("adminCoverBtn");
+    if (!overlay || !img) return;
+
+    img.src = url;
+    img.dataset.url = url;
+    overlay.style.display = "flex";
+    if (status) status.textContent = "";
+
+    const isCover = window.currentCar?.cover_image === url;
+    if (badge) badge.style.display = isCover ? "" : "none";
+    if (coverBtn) coverBtn.textContent = isCover ? "Cover ✅" : "Set as cover";
+  }
+  function closeAdminPhotoModal(){
+    const overlay = $("adminPhotoOverlay");
+    const img = $("adminPhotoImg");
+    const status = $("adminPhotoStatus");
+    if (overlay) overlay.style.display = "none";
+    if (img){ img.src = ""; img.dataset.url = ""; }
+    if (status) status.textContent = "";
+  }
+
+  function wireAdminModalButtons(){
+    $("adminPhotoClose")?.addEventListener("click", closeAdminPhotoModal);
+    $("adminPhotoOverlay")?.addEventListener("click", (e) => {
+      if (e.target === $("adminPhotoOverlay")) closeAdminPhotoModal();
+    });
+
+    $("adminCoverBtn")?.addEventListener("click", async () => {
+      if (!canSeeAdminNow()) return alert("Admin only.");
+      const car = window.currentCar;
+      const url = $("adminPhotoImg")?.dataset?.url;
+      const status = $("adminPhotoStatus");
+      if (!car?.id || !url) return;
+
+      try{
+        if (status) status.textContent = "Setting cover...";
+        await setCoverImage(car.id, url);
+        if (status) status.textContent = "Cover updated. Reloading...";
+        location.reload();
+      } catch(err){
+        console.error(err);
+        if (status) status.textContent = "Failed.";
+        alert("Cover update failed. Check console.");
+      }
+    });
+
+    $("adminDeleteBtn")?.addEventListener("click", async () => {
+      if (!canSeeAdminNow()) return alert("Admin only.");
+      const car = window.currentCar;
+      const url = $("adminPhotoImg")?.dataset?.url;
+      const status = $("adminPhotoStatus");
+      if (!car?.id || !url) return;
+
+      const ok = confirm("Delete this photo? (no undo)");
+      if (!ok) return;
+
+      try{
+        if (status) status.textContent = "Deleting...";
+        await deleteCarImage(car.id, url);
+        if (status) status.textContent = "Deleted. Reloading...";
+        location.reload();
+      } catch(err){
+        console.error(err);
+        if (status) status.textContent = "Failed.";
+        alert("Delete failed. Check console.");
+      }
+    });
+  }
+
+  /**********************
+   * Gallery controller
+   **********************/
+  const PAB_GALLERY = {
+    images: [],
+    currentIndex: 0,
+    pending: [], // [{file, url}]
+    isWired: false,
+
+    init(images){
+      this.images = (images || []).filter(Boolean);
+      this.currentIndex = 0;
+
+      const mainImg = $("mainImg");
+      const thumbsContainer = $("thumbs");
+      const dotsContainer = $("sliderDots");
+      if (!mainImg || !thumbsContainer || !dotsContainer) return;
+
+      if (this.images.length === 0){
+        mainImg.src = "";
+        thumbsContainer.innerHTML = "";
+        dotsContainer.innerHTML = "";
+        this.injectAdminThumbTiles();
+        this.renderPendingThumbs();
+        return;
+      }
+
+      const prevBtn = document.querySelector(".slider-btn.prev");
+      const nextBtn = document.querySelector(".slider-btn.next");
+      const dotsBox = $("sliderDots");
+      const showNav = this.images.length > 1;
+      if (prevBtn) prevBtn.style.display = showNav ? "flex" : "none";
+      if (nextBtn) nextBtn.style.display = showNav ? "flex" : "none";
+      if (dotsBox) dotsBox.style.display = showNav ? "flex" : "none";
+
+      mainImg.src = this.images[0];
+
+      // SAVED thumbs only
+      thumbsContainer.innerHTML = this.images.map((url, idx) => `
+        <div class="thumb${idx===0 ? " active" : ""}" data-idx="${idx}" data-img="${url}">
+          <img src="${url}" alt="Photo ${idx+1}">
+          <div class="thumb-cover-badge">COVER</div>
+        </div>
+      `).join("");
+
+      // dots
+      dotsContainer.innerHTML = this.images.map((_, idx) => `
+        <div class="dot${idx===0 ? " active" : ""}" data-idx="${idx}"></div>
+      `).join("");
+
+      // thumb click (saved only)
+      thumbsContainer.querySelectorAll(".thumb").forEach(el => {
+        el.addEventListener("click", () => {
+          const idx = parseInt(el.dataset.idx, 10);
+          if (!Number.isFinite(idx)) return;
+          this.goTo(idx);
+        });
       });
 
-    if (error) throw error;
+      dotsContainer.querySelectorAll(".dot").forEach(el => {
+        el.addEventListener("click", () => {
+          const idx = parseInt(el.dataset.idx, 10);
+          if (!Number.isFinite(idx)) return;
+          this.goTo(idx);
+        });
+      });
 
-    uploadedUrls.push(getPublicUrl(path));
-  }
+      window.changeSlide = (dir) => {
+        if (!this.images.length) return;
+        let next = this.currentIndex + dir;
+        if (next < 0) next = this.images.length - 1;
+        if (next >= this.images.length) next = 0;
+        this.goTo(next);
+      };
 
-  return uploadedUrls;
-}
+      mainImg.onclick = () => {
+        if (canSeeAdminNow()){
+          const url = this.images[this.currentIndex];
+          openAdminPhotoModal(url);
+          return;
+        }
+        this.openFullscreen();
+      };
 
-async function saveCarImages(carId, newUrls) {
-  const existing = Array.isArray(window.currentCar?.images) ? window.currentCar.images : [];
-  const merged = [...existing, ...newUrls];
+      this.updateCoverBadges();
+      this.injectAdminThumbTiles();
+      this.renderPendingThumbs();
 
-  const { error } = await db.from("cars").update({ images: merged }).eq("id", carId);
-  if (error) throw error;
-}
-  
+      if (!this.isWired){
+        this.wireFullscreen();
+        this.isWired = true;
+      }
+    },
 
+    goTo(idx){
+      this.currentIndex = idx;
+      const mainImg = $("mainImg");
+      if (mainImg) mainImg.src = this.images[idx];
 
+      // IMPORTANT: only toggle saved thumbs, not pending previews below
+      document.querySelectorAll("#thumbs .thumb").forEach((t, i) => t.classList.toggle("active", i === idx));
+      document.querySelectorAll("#sliderDots .dot").forEach((d, i) => d.classList.toggle("active", i === idx));
+    },
 
+    openFullscreen(){
+      const overlay = $("fullscreenOverlay");
+      const fullImg = $("fullscreenImg");
+      const counter = $("fullscreenCounter");
+      if (!overlay || !fullImg || !counter) return;
+      fullImg.src = this.images[this.currentIndex];
+      counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+      overlay.classList.add("active");
+    },
 
+    wireFullscreen(){
+      const overlay = $("fullscreenOverlay");
+      const fullImg = $("fullscreenImg");
+      const counter = $("fullscreenCounter");
+      const close = $("fullscreenClose");
+      const prev = $("fullscreenPrev");
+      const next = $("fullscreenNext");
 
+      close?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        overlay?.classList.remove("active");
+      });
 
+      overlay?.addEventListener("click", (e) => {
+        if (e.target === overlay) overlay.classList.remove("active");
+      });
 
+      prev?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.changeSlide(-1);
+        if (fullImg) fullImg.src = this.images[this.currentIndex];
+        if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+      });
 
-  async function loadCar() {
+      next?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.changeSlide(1);
+        if (fullImg) fullImg.src = this.images[this.currentIndex];
+        if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (!overlay?.classList.contains("active")) return;
+        if (e.key === "ArrowLeft"){
+          window.changeSlide(-1);
+          if (fullImg) fullImg.src = this.images[this.currentIndex];
+          if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+        }
+        if (e.key === "ArrowRight"){
+          window.changeSlide(1);
+          if (fullImg) fullImg.src = this.images[this.currentIndex];
+          if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+        }
+        if (e.key === "Escape"){
+          overlay.classList.remove("active");
+        }
+      });
+
+      let startX = 0, endX = 0;
+      overlay?.addEventListener("touchstart", (e) => { startX = e.changedTouches[0].screenX; });
+      overlay?.addEventListener("touchend", (e) => {
+        endX = e.changedTouches[0].screenX;
+        if (endX < startX - 50){
+          window.changeSlide(1);
+        } else if (endX > startX + 50){
+          window.changeSlide(-1);
+        }
+        if (fullImg) fullImg.src = this.images[this.currentIndex];
+        if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+      });
+    },
+
+    updateCoverBadges(){
+      const car = window.currentCar;
+      const cover = car?.cover_image;
+      document.querySelectorAll("#thumbs .thumb").forEach(el => {
+        const url = el.dataset.img;
+        const badge = el.querySelector(".thumb-cover-badge");
+        if (!badge) return;
+
+        if (canSeeAdminNow() && cover && url === cover){
+          badge.style.display = "";
+        } else {
+          badge.style.display = "none";
+        }
+      });
+    },
+
+    injectAdminThumbTiles(){
+      const toolsRow = $("adminToolsRow");
+      const divider = $("adminDivider");
+      const area = $("adminUploadsArea");
+      if (!toolsRow || !divider || !area) return;
+
+      // reset tools
+      toolsRow.innerHTML = "";
+
+      if (!canSeeAdminNow()){
+        divider.style.display = "none";
+        area.style.display = "none";
+        return;
+      }
+
+      divider.style.display = "";
+      area.style.display = "";
+
+      // hidden input
+      let input = $("adminThumbUploadInput");
+      if (!input){
+        input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.multiple = true;
+        input.id = "adminThumbUploadInput";
+        input.style.display = "none";
+        document.body.appendChild(input);
+
+        input.addEventListener("change", () => {
+          const files = input.files ? Array.from(input.files) : [];
+          if (!files.length) return;
+
+          for (const f of files){
+            const url = URL.createObjectURL(f);
+            this.pending.push({ file: f, url });
+          }
+          input.value = "";
+          this.renderPendingThumbs();
+        });
+      }
+
+      // upload tile
+      const uploadTile = document.createElement("div");
+      uploadTile.className = "admin-upload-tile admin-only";
+      uploadTile.innerHTML = `<div class="icon">🖼</div><div class="label">Upload</div>`;
+      uploadTile.title = "Select photos (not saved yet)";
+      uploadTile.addEventListener("click", () => {
+        if (!canSeeAdminNow()) return alert("Admin only.");
+        input.click();
+      });
+
+      // commit tile
+      const commitTile = document.createElement("div");
+      commitTile.className = "admin-commit-tile admin-only";
+      commitTile.innerHTML = `<div class="icon">⬆</div><div class="label">Save 0</div>`;
+      commitTile.title = "Upload selected photos to Supabase";
+      commitTile.style.display = "none";
+
+      commitTile.addEventListener("click", async () => {
+        if (!canSeeAdminNow()) return alert("Admin only.");
+        const car = window.currentCar;
+        if (!car?.id) return alert("Car not loaded yet.");
+        if (!this.pending.length) return;
+
+        commitTile.style.pointerEvents = "none";
+        commitTile.style.opacity = "0.75";
+        commitTile.querySelector(".label").textContent = "Uploading...";
+
+        try{
+          const files = this.pending.map(p => p.file);
+          const urls = await uploadPhotosForCar(car.id, files);
+          await saveCarImages(car.id, urls);
+
+          if (!car.cover_image && urls[0]){
+            await setCoverImage(car.id, urls[0]);
+          }
+
+          this.pending.forEach(p => { try{ URL.revokeObjectURL(p.url); }catch(e){} });
+          this.pending = [];
+
+          location.reload();
+        } catch(err){
+          console.error(err);
+          alert("Upload failed. Check console.");
+          commitTile.style.pointerEvents = "";
+          commitTile.style.opacity = "";
+          this.renderPendingThumbs();
+        }
+      });
+
+      toolsRow.appendChild(uploadTile);
+      toolsRow.appendChild(commitTile);
+
+      this.updateCommitTile();
+    },
+
+    updateCommitTile(){
+      const commitTile = document.querySelector("#adminToolsRow .admin-commit-tile");
+      if (!commitTile) return;
+
+      if (!canSeeAdminNow() || !this.pending.length){
+        commitTile.style.display = "none";
+        return;
+      }
+      commitTile.style.display = "";
+      commitTile.querySelector(".label").textContent = `Save ${this.pending.length}`;
+      commitTile.style.pointerEvents = "";
+      commitTile.style.opacity = "";
+    },
+
+    renderPendingThumbs(){
+      const pendingRow = $("adminPendingRow");
+      const divider = $("adminDivider");
+      const area = $("adminUploadsArea");
+      if (!pendingRow || !divider || !area) return;
+
+      pendingRow.innerHTML = "";
+
+      if (!canSeeAdminNow()){
+        divider.style.display = "none";
+        area.style.display = "none";
+        this.updateCommitTile();
+        return;
+      }
+
+      divider.style.display = "";
+      area.style.display = "";
+
+      for (let i = 0; i < this.pending.length; i++){
+        const p = this.pending[i];
+
+        const el = document.createElement("div");
+        el.className = "thumb pending admin-only";
+        el.dataset.pendingIdx = String(i);
+        el.innerHTML = `
+          <img src="${p.url}" alt="Pending ${i+1}">
+          <button class="thumb-remove" title="Remove">×</button>
+        `;
+
+        const btn = el.querySelector(".thumb-remove");
+        if (btn){
+          btn.style.display = "";
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const idx = parseInt(el.dataset.pendingIdx, 10);
+            if (!Number.isFinite(idx)) return;
+
+            const removed = this.pending.splice(idx, 1)[0];
+            if (removed?.url){
+              try{ URL.revokeObjectURL(removed.url); }catch(e){}
+            }
+            this.renderPendingThumbs();
+          });
+        }
+
+        el.addEventListener("click", () => {
+          if (!canSeeAdminNow()) return;
+
+          openAdminPhotoModal(p.url);
+          const status = $("adminPhotoStatus");
+          if (status) status.textContent = "Not uploaded yet. Click Save to upload. (Delete here removes it from pending.)";
+
+          $("adminCoverBtn").disabled = true;
+          $("adminDeleteBtn").disabled = true;
+
+          const onCloseReset = () => {
+            $("adminCoverBtn").disabled = false;
+            $("adminDeleteBtn").disabled = false;
+            document.removeEventListener("adminModalClosed", onCloseReset);
+          };
+          document.addEventListener("adminModalClosed", onCloseReset);
+        });
+
+        pendingRow.appendChild(el);
+      }
+
+      this.updateCommitTile();
+    }
+  };
+
+  // Patch close to re-enable buttons for pending previews
+  (function(){
+    const oldClose = closeAdminPhotoModal;
+    window.closeAdminPhotoModal = function(){
+      oldClose();
+      document.dispatchEvent(new Event("adminModalClosed"));
+    };
+  })();
+
+  /**********************
+   * load + render car
+   **********************/
+  async function loadCar(){
     const urlParams = new URLSearchParams(window.location.search);
     const carId = urlParams.get("id");
+    if (!carId){ console.error("No car ID in URL"); return; }
 
-    if (!carId) {
-      console.error("No car ID in URL");
-      return;
-    }
-
-    const { data, error } = await db
-      .from("cars")
-      .select("*")
-      .eq("id", carId)
-      .single();
-
-    if (error || !data) {
-      console.error("Failed to load car", error);
-      return;
-    }
+    const { data, error } = await db.from("cars").select("*").eq("id", carId).single();
+    if (error || !data){ console.error("Failed to load car", error); return; }
 
     renderCar(data);
-applyAdminView();
   }
 
-  function renderCar(car) {
-    window.currentCar = car; // so upload functions can access car.id and existing images
-    // HEADER
-    const title = car.title || `${car.year || ""} ${car.make || ""} ${car.model || ""}`.trim();
-    document.querySelector(".car-header h1").textContent = title;
-    document.querySelector(".car-price").textContent = `$${car.price ?? ""}`;
-    document.querySelector(".car-meta").textContent =
-      `${car.mileage ?? "—"} miles · ${car.history_status || "Clean history"}`;
+  function renderCar(car){
+    window.currentCar = car;
 
-    // DESCRIPTION
-    const descEl = document.getElementById("carDescription");
+    const title = car.title || `${car.year||""} ${car.make||""} ${car.model||""}`.trim();
+    document.querySelector(".car-header h1").textContent = title || "Car";
+    document.querySelector(".car-price").textContent = car.price != null ? `$${car.price}` : "—";
+    document.querySelector(".car-meta").textContent = `${car.mileage ?? "—"} miles · ${car.history_status || "Clean history"}`;
+
+    const descEl = $("carDescription");
     if (descEl) descEl.textContent = car.description || "No description available.";
 
-    // MAIN IMAGE
-    const mainImgEl = document.getElementById("mainImg");
-    if (mainImgEl && car.cover_image) {
-      mainImgEl.src = car.cover_image;
-      mainImgEl.alt = title;
+    const mainImgEl = $("mainImg");
+    if (mainImgEl){
+      const cover = car.cover_image || (Array.isArray(car.images) && car.images[0]) || mainImgEl.src;
+      mainImgEl.src = cover || mainImgEl.src;
+      mainImgEl.alt = title || "Car photo";
     }
 
     const imgs = Array.isArray(car.images) ? car.images : [];
-const galleryImages = imgs.length ? imgs : (car.cover_image ? [car.cover_image] : []);
-PAB_GALLERY.init(galleryImages);
+    const galleryImages = imgs.length ? imgs : (car.cover_image ? [car.cover_image] : []);
+    PAB_GALLERY.init(galleryImages);
 
-    // SPECS (match by label text)
     document.querySelectorAll(".spec-item").forEach(item => {
       const label = item.querySelector(".spec-label")?.textContent?.trim().toLowerCase();
       const valueEl = item.querySelector(".spec-value");
@@ -1315,341 +1618,78 @@ PAB_GALLERY.init(galleryImages);
       else if (label.includes("vin")) valueEl.textContent = car.vin ?? "—";
     });
 
-    // ADMIN BUTTONS (cars.html)
-const isAdmin = window.isAdmin && (localStorage.getItem("viewMode") !== "user");
+    const isAdminEffective = canSeeAdminNow();
+    const adminBox = $("carAdminActions");
+    if (adminBox) adminBox.style.display = isAdminEffective ? "" : "none";
 
-const adminBox = document.getElementById("carAdminActions");
-if (adminBox) adminBox.style.display = isAdmin ? "" : "none";
+    const toggleSoldBtn = $("toggleSoldBtn");
+    if (toggleSoldBtn){
+      toggleSoldBtn.textContent = (car.status === "sold") ? "Unmark Sold" : "Mark Sold";
+      toggleSoldBtn.onclick = async () => {
+        if (!canSeeAdminNow()) return;
+        const nextStatus = (car.status === "sold") ? "available" : "sold";
+        const ok = confirm(`Set status to "${nextStatus}"?`);
+        if (!ok) return;
 
-const uploadBox = document.getElementById("carUploadBox");
-if (uploadBox) uploadBox.style.display = isAdmin ? "" : "none";
-
-
-const toggleSoldBtn = document.getElementById("toggleSoldBtn");
-if (toggleSoldBtn) {
-  toggleSoldBtn.textContent = (car.status === "sold") ? "Unmark Sold" : "Mark Sold";
-
-  toggleSoldBtn.onclick = async () => {
-    if (!isAdmin) return;
-
-    const nextStatus = (car.status === "sold") ? "available" : "sold";
-    const ok = confirm(`Set status to "${nextStatus}"?`);
-    if (!ok) return;
-
-    const { error } = await db.from("cars").update({ status: nextStatus }).eq("id", car.id);
-    if (error) { console.error(error); alert("Failed."); return; }
-
-    location.reload();
-  };
-}
-
-
-const delBtn = document.getElementById("deleteCarBtn");
-if (delBtn) delBtn.onclick = async () => {
-  if (!isAdmin) return;
-
-  const ok = confirm("Delete this car forever? (no undo)");
-  if (!ok) return;
-
-  const { error } = await db.from("cars").delete().eq("id", car.id);
-  if (error) { console.error(error); alert("Failed."); return; }
-
-  window.location.href = "../index.html#cars";
-};
-
-
-const editBtn = document.getElementById("editCarBtn");
-if (editBtn) editBtn.onclick = () => {
-  if (!isAdmin) return;
-  alert("Next step: inline edit form. We wire that after buttons work.");
-};
-
-
-  }
-
-  loadCar();
-</script>
-
-<!---------------------GPT END------------------>
-<script>
-  // One gallery controller. No redeclare wars.
-  const PAB_GALLERY = {
-    images: [],
-    currentIndex: 0,
-    init(images) {
-      this.images = images.filter(Boolean);
-      this.currentIndex = 0;
-
-      const mainImg = document.getElementById("mainImg");
-      const thumbsContainer = document.querySelector(".thumbs");
-      const dotsContainer = document.getElementById("sliderDots");
-
-      if (!mainImg || !thumbsContainer || !dotsContainer) return;
-
-      // If no images, do nothing
-      if (this.images.length === 0) return;
-
-      // Main image
-      mainImg.src = this.images[0];
-
-      // Thumbs
-      thumbsContainer.innerHTML = this.images.map((url, idx) => `
-        <div class="thumb${idx === 0 ? " active" : ""}" data-idx="${idx}">
-          <img src="${url}" alt="Photo ${idx + 1}">
-        </div>
-      `).join("");
-
-      // Dots
-      dotsContainer.innerHTML = this.images.map((_, idx) => `
-        <div class="dot${idx === 0 ? " active" : ""}" data-idx="${idx}"></div>
-      `).join("");
-
-      // Click handlers (thumbs + dots)
-      thumbsContainer.querySelectorAll(".thumb").forEach(el => {
-        el.addEventListener("click", () => this.goTo(parseInt(el.dataset.idx, 10)));
-      });
-      dotsContainer.querySelectorAll(".dot").forEach(el => {
-        el.addEventListener("click", () => this.goTo(parseInt(el.dataset.idx, 10)));
-      });
-
-      // Prev/Next buttons already call changeSlide()
-      window.changeSlide = (dir) => {
-        if (!this.images.length) return;
-        let next = this.currentIndex + dir;
-        if (next < 0) next = this.images.length - 1;
-        if (next >= this.images.length) next = 0;
-        this.goTo(next);
+        const { error } = await db.from("cars").update({ status: nextStatus }).eq("id", car.id);
+        if (error){ console.error(error); alert("Failed."); return; }
+        location.reload();
       };
+    }
 
-      // Fullscreen (re-uses your existing elements)
-      mainImg.onclick = () => {
-        const overlay = document.getElementById("fullscreenOverlay");
-        const fullImg = document.getElementById("fullscreenImg");
-        const counter = document.getElementById("fullscreenCounter");
-        if (!overlay || !fullImg || !counter) return;
+    const delBtn = $("deleteCarBtn");
+    if (delBtn){
+      delBtn.onclick = async () => {
+        if (!canSeeAdminNow()) return;
+        const ok = confirm("Delete this car forever? (no undo)");
+        if (!ok) return;
 
-        fullImg.src = this.images[this.currentIndex];
-        counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
-        overlay.classList.add("active");
+        const { error } = await db.from("cars").delete().eq("id", car.id);
+        if (error){ console.error(error); alert("Failed."); return; }
+        window.location.href = "../index.html#cars";
       };
-
-      // Fullscreen prev/next
-      const fullPrev = document.getElementById("fullscreenPrev");
-      const fullNext = document.getElementById("fullscreenNext");
-      const fullImg = document.getElementById("fullscreenImg");
-      const counter = document.getElementById("fullscreenCounter");
-
-      if (fullPrev) fullPrev.onclick = (e) => { e.stopPropagation(); window.changeSlide(-1); if(fullImg) fullImg.src = this.images[this.currentIndex]; if(counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`; };
-      if (fullNext) fullNext.onclick = (e) => { e.stopPropagation(); window.changeSlide(1);  if(fullImg) fullImg.src = this.images[this.currentIndex]; if(counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`; };
-    },
-
-    goTo(idx) {
-      this.currentIndex = idx;
-
-      const mainImg = document.getElementById("mainImg");
-      if (mainImg) mainImg.src = this.images[idx];
-
-      document.querySelectorAll(".thumb").forEach((t, i) => t.classList.toggle("active", i === idx));
-      document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === idx));
     }
-  };
 
-  // In your renderCar(car), call this at the end:
-  // PAB_GALLERY.init(galleryImages);
-</script>
-<!---------------------Admin Start------------->
-<script>
-  // Global flag used later for admin-only UI
-  window.isAdmin = false;
-
-  function $(id){ return document.getElementById(id); }
-
-async function refreshAuthUI() {
-  const { data: { session } } = await db.auth.getSession();
-  window.isAdmin = !!session;
-
-  const adminSection = $("adminSection");
-  const ownerLoginSection = $("ownerLoginSection");
-
-  const outBox = $("authLoggedOut");
-  const inBox  = $("authLoggedIn");
-  const emailLabel = $("adminEmailLabel");
-
-  // If logged in: show admin section, hide "Owner Login" button
-  if (window.isAdmin) {
-    if (adminSection) adminSection.style.display = "";
-    if (ownerLoginSection) ownerLoginSection.style.display = "none";
-  } else {
-    // Logged out: hide admin section (until owner clicks Owner Login)
-    if (adminSection) adminSection.style.display = "none";
-    if (ownerLoginSection) ownerLoginSection.style.display = "";
+    const editBtn = $("editCarBtn");
+    if (editBtn){
+      editBtn.onclick = () => {
+        if (!canSeeAdminNow()) return;
+        alert("Next step: inline edit form. We wire that after buttons work.");
+      };
+    }
   }
 
-  // Logged-in vs logged-out boxes inside admin section
-  if (outBox) outBox.style.display = window.isAdmin ? "none" : "";
-  if (inBox)  inBox.style.display  = window.isAdmin ? "" : "none";
+  /**********************
+   * DOM wiring
+   **********************/
+  document.addEventListener("DOMContentLoaded", async () => {
+    $("loginBtn")?.addEventListener("click", loginOwner);
+    $("logoutBtn")?.addEventListener("click", logoutOwner);
 
-  if (emailLabel && session?.user?.email) {
-    emailLabel.textContent = `Logged in as: ${session.user.email}`;
-  }
+    $("showOwnerLoginBtn")?.addEventListener("click", () => {
+      const adminSection = $("adminSection");
+      if (adminSection) adminSection.style.display = "";
+      if ($("ownerLoginSection")) $("ownerLoginSection").style.display = "none";
+      if ($("authLoggedOut")) $("authLoggedOut").style.display = "";
+      if ($("authLoggedIn")) $("authLoggedIn").style.display = "none";
+    });
 
-  applyAdminView();
-  updateViewButtons();
-}
+    $("viewUserBtn")?.addEventListener("click", () => setViewMode("user"));
+    $("viewAdminBtn")?.addEventListener("click", () => setViewMode("admin"));
 
-
-
-  async function loginOwner() {
-    const email = $("adminEmail")?.value?.trim();
-    const password = $("adminPassword")?.value;
-
-    if (!email || !password) {
-      alert("Enter email + password.");
-      return;
-    }
-
-    const { error } = await db.auth.signInWithPassword({ email, password });
-    if (error) {
-      console.error(error);
-      alert("Login failed.");
-      return;
-    }
+    updateViewButtons();
+    wireAdminModalButtons();
 
     await refreshAuthUI();
-  }
+    await loadCar();
 
-  async function logoutOwner() {
-    const { error } = await db.auth.signOut();
-    if (error) console.error(error);
-    await refreshAuthUI();
-  }
-
-  // Wire buttons once DOM exists
-document.addEventListener("DOMContentLoaded", async () => {
-  $("loginBtn")?.addEventListener("click", loginOwner);
-  $("logoutBtn")?.addEventListener("click", logoutOwner);
-
-  // ✅ ADD THIS (UPLOAD BUTTON WIRING)
-  $("uploadPhotosBtn")?.addEventListener("click", async () => {
-    const isAdminEffective = window.isAdmin && (localStorage.getItem("viewMode") !== "user");
-    if (!isAdminEffective) return alert("Admin only.");
-
-    const car = window.currentCar;
-    if (!car?.id) return alert("Car not loaded yet.");
-
-    const input = $("photoInput");
-    const status = $("uploadStatus");
-    const btn = $("uploadPhotosBtn");
-
-    const files = input?.files ? Array.from(input.files) : [];
-    if (!files.length) return alert("Choose photos first.");
-
-    try {
-      btn.disabled = true;
-      btn.textContent = "Uploading...";
-      if (status) status.textContent = `Compressing + uploading ${files.length} photo(s)...`;
-
-      const urls = await uploadPhotosForCar(car.id, files);
-
-      if (status) status.textContent = `Saving ${urls.length} URL(s) to database...`;
-      await saveCarImages(car.id, urls);
-
-      if (status) status.textContent = "Done. Reloading...";
-      location.reload();
-    } catch (err) {
-      console.error(err);
-      alert("Upload failed. Check console.");
-      if (status) status.textContent = "Upload failed.";
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Upload Selected Photos";
-    }
+    db.auth.onAuthStateChange(async () => {
+      await refreshAuthUI();
+      PAB_GALLERY.updateCoverBadges();
+      PAB_GALLERY.injectAdminThumbTiles();
+      PAB_GALLERY.renderPendingThumbs();
+    });
   });
-
-  await refreshAuthUI();
-
-  db.auth.onAuthStateChange(() => refreshAuthUI());
-
-  $("showOwnerLoginBtn")?.addEventListener("click", () => {
-    const adminSection = $("adminSection");
-    if (adminSection) adminSection.style.display = "";
-    $("ownerLoginSection")?.style && ($("ownerLoginSection").style.display = "none");
-    $("authLoggedOut") && ($("authLoggedOut").style.display = "");
-    $("authLoggedIn") && ($("authLoggedIn").style.display = "none");
-  });
-});
-
-
-
-
-  function setViewMode(mode) {
-  localStorage.setItem("viewMode", mode);
-  updateViewButtons();
-  applyAdminView();
-}
-
-function getViewMode() {
-  return localStorage.getItem("viewMode") || "admin";
-}
-
-
-
-
-function updateViewButtons() {
-  const mode = getViewMode();
-  const userBtn = document.getElementById("viewUserBtn");
-  const adminBtn = document.getElementById("viewAdminBtn");
-
-  if (!userBtn || !adminBtn) return;
-
-  if (mode === "admin") {
-    adminBtn.classList.add("view-btn-active");
-    adminBtn.classList.remove("view-btn-inactive");
-
-    userBtn.classList.add("view-btn-inactive");
-    userBtn.classList.remove("view-btn-active");
-  } else {
-    userBtn.classList.add("view-btn-active");
-    userBtn.classList.remove("view-btn-inactive");
-
-    adminBtn.classList.add("view-btn-inactive");
-    adminBtn.classList.remove("view-btn-active");
-  }
-}
-
-
-
-
-
-document.getElementById("viewUserBtn")?.addEventListener("click", () => {
-  setViewMode("user");
-});
-
-document.getElementById("viewAdminBtn")?.addEventListener("click", () => {
-  setViewMode("admin");
-});
-
-
-
-
-function applyAdminView() {
-  const mode = getViewMode(); // "admin" or "user"
-  const adminEls = document.querySelectorAll(".admin-only");
-
-  const canSeeAdmin = window.isAdmin && mode === "admin";
-
-  adminEls.forEach(el => {
-    el.style.display = canSeeAdmin ? "" : "none";
-  });
-}
-
-
-
-
-
-updateViewButtons();
-applyAdminView();
 </script>
-<!---------------------Admin End------------->
-  </body>
+</body>
 </html>
