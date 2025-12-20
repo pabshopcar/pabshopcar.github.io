@@ -585,6 +585,11 @@
       .contact-btn{ width:100%; min-width:auto; }
       .action-buttons{ gap:12px; }
       .action-btn{ padding:16px 16px; font-size:15px; }
+
+      /* ✅ iOS Safari zoom fix (only for Add Car modal inputs) */
+      #addCarOverlay input{
+        font-size:16px !important;
+      }
     }
 
     @media(max-width:480px){
@@ -604,6 +609,145 @@
       color: var(--muted);
       border: 2px solid var(--border);
     }
+
+    /* ====== NEW: Pretty confirm modal (same vibe as cars.html) ====== */
+    .pab-confirm-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+      backdrop-filter:blur(4px);
+      z-index:5000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .pab-confirm-modal{
+      width:min(560px, 95vw);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.35);
+      overflow:hidden;
+      transform:scale(0.95) translateY(10px);
+      opacity:0;
+      transition:transform 0.2s ease, opacity 0.2s ease;
+    }
+    .pab-confirm-overlay.active{ display:flex; }
+    .pab-confirm-overlay.active .pab-confirm-modal{
+      transform:scale(1) translateY(0);
+      opacity:1;
+    }
+    .pab-confirm-head{
+      padding:18px 18px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(135deg, rgba(11,110,255,0.08), rgba(11,110,255,0.03));
+    }
+    [data-theme="dark"] .pab-confirm-head{
+      background:linear-gradient(135deg, rgba(78,168,255,0.12), rgba(255,255,255,0.03));
+    }
+    .pab-confirm-title{
+      font-weight:900;
+      letter-spacing:-0.3px;
+      font-size:16px;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .pab-confirm-icon{
+      width:34px; height:34px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      background:var(--glass);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+    }
+    .pab-confirm-close{
+      width:38px; height:38px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--glass);
+      color:var(--text);
+      font-size:22px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:transform 0.2s ease;
+    }
+    .pab-confirm-close:hover{ transform:rotate(90deg); }
+    .pab-confirm-body{
+      padding:16px 18px 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.6;
+    }
+    .pab-confirm-actions{
+      padding:18px;
+      display:flex;
+      gap:12px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .pab-confirm-btn{
+      border:none;
+      border-radius:12px;
+      padding:12px 16px;
+      font-weight:900;
+      cursor:pointer;
+      transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:0 4px 15px rgba(0,0,0,0.18);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-width:120px;
+      font-size:14px;
+    }
+    .pab-confirm-btn:active{ transform:translateY(-1px); }
+    .pab-confirm-btn.cancel{
+      background:linear-gradient(135deg, rgba(15,23,36,0.10), rgba(15,23,36,0.18));
+      color:var(--text);
+    }
+    [data-theme="dark"] .pab-confirm-btn.cancel{
+      background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.14));
+      color:#fff;
+      box-shadow:0 4px 15px rgba(0,0,0,0.35);
+    }
+    .pab-confirm-btn.cancel:hover{ transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,0,0,0.22); }
+
+    .pab-confirm-btn.ok{
+      background:linear-gradient(135deg,var(--accent),#2b8fff);
+      color:#fff;
+      box-shadow:0 4px 15px rgba(11,110,255,0.35);
+    }
+    .pab-confirm-btn.ok:hover{ transform:translateY(-2px); box-shadow:0 8px 25px rgba(11,110,255,0.45); }
+
+    .pab-confirm-btn.warn{
+      background: linear-gradient(135deg,#fbbf24,#f59e0b);
+      color:#111827;
+      box-shadow:0 4px 15px rgba(245,158,11,0.35);
+    }
+    .pab-confirm-btn.warn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 25px rgba(245,158,11,0.45);
+    }
+
+    .pab-confirm-btn.danger{
+      background:linear-gradient(135deg,#ff4d4d,#dc2626);
+      color:#fff;
+      box-shadow:0 4px 15px rgba(220,38,38,0.35);
+    }
+    .pab-confirm-btn.danger:hover{ transform:translateY(-2px); box-shadow:0 8px 25px rgba(220,38,38,0.45); }
+    /* ====== end confirm modal ====== */
   </style>
 </head>
 
@@ -704,6 +848,25 @@
     </div>
   </div>
 </div>
+
+<!-- ====== NEW: Pretty confirm modal ====== -->
+<div class="pab-confirm-overlay" id="pabConfirmOverlay" aria-hidden="true">
+  <div class="pab-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="pabConfirmTitle">
+    <div class="pab-confirm-head">
+      <div class="pab-confirm-title" id="pabConfirmTitle">
+        <span class="pab-confirm-icon" id="pabConfirmIcon">?</span>
+        <span id="pabConfirmTitleText">Confirm</span>
+      </div>
+      <button class="pab-confirm-close" id="pabConfirmClose" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="pab-confirm-body" id="pabConfirmMsg">Are you sure?</div>
+    <div class="pab-confirm-actions">
+      <button class="pab-confirm-btn cancel" id="pabConfirmCancel" type="button">Cancel</button>
+      <button class="pab-confirm-btn ok" id="pabConfirmOk" type="button">OK</button>
+    </div>
+  </div>
+</div>
+<!-- ====== end confirm modal ====== -->
 
 <section class="hero" id="home">
   <div class="container">
@@ -854,6 +1017,90 @@
     location.reload(); // per your old requirement
   }
 
+  /* ====== NEW: Pretty confirm modal helper ====== */
+  const PAB_CONFIRM = {
+    open: false,
+    resolver: null,
+    escHandler: null,
+
+    show({ title="Confirm", message="Are you sure?", okText="OK", cancelText="Cancel", danger=false, icon="?" }){
+      return new Promise((resolve) => {
+        const overlay = $("pabConfirmOverlay");
+        const titleText = $("pabConfirmTitleText");
+        const msg = $("pabConfirmMsg");
+        const okBtn = $("pabConfirmOk");
+        const cancelBtn = $("pabConfirmCancel");
+        const closeBtn = $("pabConfirmClose");
+        const iconEl = $("pabConfirmIcon");
+        if (!overlay || !titleText || !msg || !okBtn || !cancelBtn || !closeBtn || !iconEl){
+          resolve(window.confirm(message));
+          return;
+        }
+
+        this.open = true;
+        this.resolver = resolve;
+
+        titleText.textContent = title;
+        msg.textContent = message;
+        iconEl.textContent = icon;
+
+        okBtn.textContent = okText;
+        cancelBtn.textContent = cancelText;
+
+        okBtn.classList.remove("danger","ok","warn");
+
+        if (danger) {
+          okBtn.classList.add("danger");
+        } else if (icon === "⚠️" || icon === "✅") {
+          okBtn.classList.add("warn");
+        } else {
+          okBtn.classList.add("ok");
+        }
+
+        const finish = (val) => {
+          if (!this.open) return;
+          this.open = false;
+
+          overlay.classList.remove("active");
+          overlay.style.display = "none";
+          overlay.setAttribute("aria-hidden", "true");
+
+          okBtn.onclick = null;
+          cancelBtn.onclick = null;
+          closeBtn.onclick = null;
+
+          if (this.escHandler){
+            document.removeEventListener("keydown", this.escHandler);
+            this.escHandler = null;
+          }
+
+          const r = this.resolver;
+          this.resolver = null;
+          if (typeof r === "function") r(val);
+        };
+
+        okBtn.onclick = () => finish(true);
+        cancelBtn.onclick = () => finish(false);
+        closeBtn.onclick = () => finish(false);
+
+        overlay.onclick = (e) => {
+          if (e.target === overlay) finish(false);
+        };
+
+        this.escHandler = (e) => {
+          if (e.key === "Escape") finish(false);
+        };
+        document.addEventListener("keydown", this.escHandler);
+
+        overlay.style.display = "flex";
+        overlay.setAttribute("aria-hidden", "false");
+        requestAnimationFrame(() => overlay.classList.add("active"));
+        setTimeout(() => okBtn.focus(), 50);
+      });
+    }
+  };
+  /* ====== end confirm helper ====== */
+
   function normalizeDigits(str){
     return String(str || "").replace(/[^\d]/g, "").trim();
   }
@@ -919,20 +1166,35 @@
           btn.addEventListener("click", e => e.stopPropagation());
         });
 
-        // Mark Sold = set status unavailable + remove from index (reload list)
+        // Mark Sold
         card.querySelector('[data-action="mark-sold"]')?.addEventListener("click", async () => {
-          if (!confirm(`Mark this car as sold?`)) return;
+          const ok = await PAB_CONFIRM.show({
+            title: "Mark as sold",
+            message: "Mark this car as SOLD? It will no longer appear as available.",
+            okText: "Mark Sold",
+            cancelText: "Cancel",
+            danger: false,
+            icon: "✅"
+          });
+          if (!ok) return;
 
           const { error } = await db.from("cars").update({ status: "sold" }).eq("id", car.id);
           if (error){ console.error(error); alert("Failed."); return; }
 
-          // remove from index by reloading list (since we filter status === available)
           loadCars();
         });
 
         // Delete
         card.querySelector('[data-action="delete"]')?.addEventListener("click", async () => {
-          if (!confirm("Delete this car forever? (no undo)")) return;
+          const ok = await PAB_CONFIRM.show({
+            title: "Delete car",
+            message: "Delete this car forever? (no undo)",
+            okText: "Delete",
+            cancelText: "Cancel",
+            danger: true,
+            icon: "🗑"
+          });
+          if (!ok) return;
 
           const { error } = await db.from("cars").delete().eq("id", car.id);
           if (error){ console.error(error); alert("Failed."); return; }

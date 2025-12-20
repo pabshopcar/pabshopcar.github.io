@@ -159,6 +159,42 @@
     .car-price{ font-size:36px; color:var(--accent); font-weight:700; margin-bottom:8px; }
     .car-meta{ color:var(--muted); font-size:18px; }
 
+
+    /* Header inline-edit inputs (title + price) */
+.car-header-input{
+  width:100%;
+  max-width:520px;
+  margin:0 0 12px;
+  text-align:left !important; /* you explicitly want left */
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--text);
+  font-weight:800;
+  font-size:clamp(28px,4.6vw,46px);
+  letter-spacing:-1px;
+}
+
+#carPriceInput.car-header-input{
+  max-width:280px;
+  font-size:36px;
+  letter-spacing:-0.5px;
+  color:var(--accent);
+}
+
+.car-header-input.editing{
+  border-color:var(--border);
+  background:var(--glass);
+}
+
+.car-header-input.changed{
+  border-color:rgba(11,110,255,0.45);
+  background:rgba(11,110,255,0.08);
+  box-shadow:0 10px 24px rgba(11,110,255,0.10);
+}
+
+
     .content-grid{
       display:grid;
       grid-template-columns:2fr 1fr;
@@ -628,7 +664,6 @@
       transform:none;
     }
     /* ====== end changed ====== */
-
     .inline-status{
       margin-top:10px;
       color:var(--muted);
@@ -858,10 +893,219 @@
       user-select:none;
     }
 
+    /* ====== NEW: Styled confirm modal (replaces confirm() for sold/delete/discard) ====== */
+    .pab-confirm-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+      backdrop-filter:blur(4px);
+      z-index:5000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .pab-confirm-modal{
+      width:min(560px, 95vw);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.35);
+      overflow:hidden;
+      transform:scale(0.95) translateY(10px);
+      opacity:0;
+      transition:transform 0.2s ease, opacity 0.2s ease;
+    }
+    .pab-confirm-overlay.active{ display:flex; }
+    .pab-confirm-overlay.active .pab-confirm-modal{
+      transform:scale(1) translateY(0);
+      opacity:1;
+    }
+    @media (max-width: 768px){
+  .spec-input,
+  .desc-textarea,
+  .car-header-input{
+    font-size: 16px !important;
+  }
+}
+.pab-confirm-btn.warn{
+  background: linear-gradient(135deg,#fbbf24,#f59e0b);
+  color:#111827;
+  box-shadow:0 4px 15px rgba(245,158,11,0.35);
+}
+.pab-confirm-btn.warn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 25px rgba(245,158,11,0.45);
+}
+
+    .pab-confirm-head{
+      padding:18px 18px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(135deg, rgba(11,110,255,0.08), rgba(11,110,255,0.03));
+    }
+    [data-theme="dark"] .pab-confirm-head{
+      background:linear-gradient(135deg, rgba(78,168,255,0.12), rgba(255,255,255,0.03));
+    }
+    .pab-confirm-title{
+      font-weight:900;
+      letter-spacing:-0.3px;
+      font-size:16px;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .pab-confirm-icon{
+      width:34px; height:34px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      background:var(--glass);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+    }
+    .pab-confirm-close{
+      width:38px; height:38px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--glass);
+      color:var(--text);
+      font-size:22px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:transform 0.2s ease;
+    }
+    .pab-confirm-close:hover{ transform:rotate(90deg); }
+    .pab-confirm-body{
+      padding:16px 18px 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.6;
+    }
+    .pab-confirm-actions{
+      padding:18px;
+      display:flex;
+      gap:12px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    .pab-confirm-btn{
+      border:none;
+      border-radius:12px;
+      padding:12px 16px;
+      font-weight:900;
+      cursor:pointer;
+      transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:0 4px 15px rgba(0,0,0,0.18);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-width:120px;
+      font-size:14px;
+    }
+    .pab-confirm-btn:active{ transform:translateY(-1px); }
+    .pab-confirm-btn.cancel{
+      background:linear-gradient(135deg, rgba(15,23,36,0.10), rgba(15,23,36,0.18));
+      color:var(--text);
+    }
+    [data-theme="dark"] .pab-confirm-btn.cancel{
+      background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.14));
+      color:#fff;
+      box-shadow:0 4px 15px rgba(0,0,0,0.35);
+    }
+    .pab-confirm-btn.cancel:hover{ transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,0,0,0.22); }
+
+    .pab-confirm-btn.ok{
+      background:linear-gradient(135deg,var(--accent),#2b8fff);
+      color:#fff;
+      box-shadow:0 4px 15px rgba(11,110,255,0.35);
+    }
+    .pab-confirm-btn.ok:hover{ transform:translateY(-2px); box-shadow:0 8px 25px rgba(11,110,255,0.45); }
+
+    .pab-confirm-btn.danger{
+      background:linear-gradient(135deg,#ff4d4d,#dc2626);
+      color:#fff;
+      box-shadow:0 4px 15px rgba(220,38,38,0.35);
+    }
+    .pab-confirm-btn.danger:hover{ transform:translateY(-2px); box-shadow:0 8px 25px rgba(220,38,38,0.45); }
+    /* ====== end confirm modal ====== */
+
+    /* ====== NEW: Top edit (title + price) UI under header ====== */
+    .top-edit-panel{
+      margin-top:14px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+    .top-edit-grid{
+      display:grid;
+      grid-template-columns: 1fr 220px;
+      gap:12px;
+      align-items:start;
+    }
+    .top-edit-field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .top-edit-label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:0.7px;
+      color:var(--muted);
+      font-weight:800;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .top-edit-input{
+      width:100%;
+      max-width:none;
+      text-align:left;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid transparent;
+      background:transparent;
+      color:var(--text);
+      font-weight:800;
+      outline:none;
+    }
+    .top-edit-input.editing{
+      border-color:var(--border);
+      background:var(--glass);
+    }
+    .top-edit-input.changed{
+      border-color:rgba(11,110,255,0.45);
+      background:rgba(11,110,255,0.08);
+      box-shadow:0 10px 24px rgba(11,110,255,0.10);
+    }
+    [data-theme="dark"] .top-edit-input.changed{
+      background:rgba(78,168,255,0.10);
+      box-shadow:0 10px 24px rgba(0,0,0,0.25);
+    }
+    .top-edit-was{
+      display:none;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .top-edit-was.show{ display:block; }
+
     @media(max-width:968px){
       .content-grid{ grid-template-columns:1fr; }
       .main-img{ height:400px; }
       .spec-value{ max-width:70%; }
+      .top-edit-grid{ grid-template-columns:1fr; }
     }
     @media(max-width:768px){
       .header-inner{padding:12px 0}
@@ -876,6 +1120,7 @@
       .description{ padding:24px; }
       .settings-modal{ padding:24px }
       .slider-dots{ right:10px; }
+      .top-edit-panel{ padding:14px; }
     }
     @media(max-width:480px){
       .logo{font-size:20px}
@@ -895,20 +1140,18 @@
     }
 
     /* Remove number input spinners (year, mileage, price) */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button{
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number]{
-  -moz-appearance: textfield; /* Firefox */
-}
-/* Center slider controls relative to the big photo only */
-.main-media{
-  position:relative;
-}
-
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button{
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number]{
+      -moz-appearance: textfield; /* Firefox */
+    }
+    /* Center slider controls relative to the big photo only */
+    .main-media{
+      position:relative;
+    }
   </style>
 </head>
 
@@ -980,9 +1223,64 @@ input[type=number]{
 
   <section class="car-detail">
     <div class="car-header">
-      <h1>Loading...</h1>
-      <div class="car-price">Loading...</div>
-      <div class="car-meta">Loading...</div>
+<div class="car-header">
+  <!-- Title (display) -->
+  <h1 id="carTitleText">Loading...</h1>
+
+  <!-- Title (edit, hidden until Edit clicked) -->
+  <input
+    id="carTitleInput"
+    class="car-header-input spec-input"
+    data-key="title"
+    type="text"
+    value=""
+    disabled
+    style="display:none;"
+  />
+
+  <!-- Price (display) -->
+  <div class="car-price" id="carPriceText">Loading...</div>
+
+  <!-- Price (edit, hidden until Edit clicked) -->
+  <input
+    id="carPriceInput"
+    class="car-header-input spec-input"
+    data-key="price"
+    type="number"
+    value=""
+    disabled
+    style="display:none;"
+  />
+
+  <div class="car-meta">Loading...</div>
+
+
+      <!-- ====== NEW: Top admin edit (title + price), under price/miles, above big picture ====== 
+      <div class="top-edit-panel admin-only" id="topHeaderEdit" style="display:none;">
+        <div class="top-edit-grid">
+          <div class="top-edit-field">
+            <div class="top-edit-label"><i class="fas fa-tag" style="color:var(--accent);"></i> Car name</div>
+            <input id="topTitleInput" class="top-edit-input spec-input" data-key="title" type="text" value="" disabled />
+            <div id="topTitleWas" class="top-edit-was"></div>
+          </div>
+
+          <div class="top-edit-field">
+            <div class="top-edit-label"><i class="fas fa-dollar-sign" style="color:var(--accent);"></i> Price</div>
+            <input id="topPriceInput" class="top-edit-input spec-input" data-key="price" type="number" value="" disabled />
+            <div id="topPriceWas" class="top-edit-was"></div>
+          </div>
+        </div>
+-->
+        <!-- duplicate edit controls (same behavior) -->
+        <div class="inline-edit-controls admin-only" id="topInlineEditControls" style="display:none;">
+          <div class="inline-edit-row">
+            <button id="topEditBtn" class="theme-btn admin-edit-btn" type="button">✏️ Edit fields</button>
+            <button id="topSaveBtn" class="theme-btn admin-save-btn" type="button" style="display:none;">✅ Save</button>
+          </div>
+          <div class="inline-status" id="topInlineStatus"></div>
+        </div>
+      </div>
+      <!-- ====== end top edit ====== -->
     </div>
 
     <div class="content-grid">
@@ -1153,6 +1451,25 @@ input[type=number]{
   </div>
 </div>
 
+<!-- ====== NEW: Pretty confirm modal ====== -->
+<div class="pab-confirm-overlay" id="pabConfirmOverlay" aria-hidden="true">
+  <div class="pab-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="pabConfirmTitle">
+    <div class="pab-confirm-head">
+      <div class="pab-confirm-title" id="pabConfirmTitle">
+        <span class="pab-confirm-icon" id="pabConfirmIcon">?</span>
+        <span id="pabConfirmTitleText">Confirm</span>
+      </div>
+      <button class="pab-confirm-close" id="pabConfirmClose" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="pab-confirm-body" id="pabConfirmMsg">Are you sure?</div>
+    <div class="pab-confirm-actions">
+      <button class="pab-confirm-btn cancel" id="pabConfirmCancel" type="button">Cancel</button>
+      <button class="pab-confirm-btn ok" id="pabConfirmOk" type="button">OK</button>
+    </div>
+  </div>
+</div>
+<!-- ====== end confirm modal ====== -->
+
 <footer>
   <div class="container">
     <p>© 2025 PAB SHOP. All rights reserved.</p>
@@ -1253,6 +1570,10 @@ input[type=number]{
     // Description edit box
     const descBox = $("adminDescEditBox");
     if (descBox) descBox.style.display = canSee ? "" : "none";
+
+    // Top header edit box
+    const topEdit = $("topHeaderEdit");
+    if (topEdit) topEdit.style.display = canSee ? "" : "none";
   }
 
   async function refreshAuthUI(){
@@ -1303,6 +1624,96 @@ input[type=number]{
     // you asked: reload on logout
     location.reload();
   }
+
+  /**********************
+   * NEW: Pretty confirm modal helper
+   **********************/
+  const PAB_CONFIRM = {
+    open: false,
+    resolver: null,
+    escHandler: null,
+
+    show({ title="Confirm", message="Are you sure?", okText="OK", cancelText="Cancel", danger=false, icon="?" }){
+      return new Promise((resolve) => {
+        const overlay = $("pabConfirmOverlay");
+        const titleText = $("pabConfirmTitleText");
+        const msg = $("pabConfirmMsg");
+        const okBtn = $("pabConfirmOk");
+        const cancelBtn = $("pabConfirmCancel");
+        const closeBtn = $("pabConfirmClose");
+        const iconEl = $("pabConfirmIcon");
+        if (!overlay || !titleText || !msg || !okBtn || !cancelBtn || !closeBtn || !iconEl){
+          // fallback if something is missing (rare)
+          resolve(window.confirm(message));
+          return;
+        }
+
+        this.open = true;
+        this.resolver = resolve;
+
+        titleText.textContent = title;
+        msg.textContent = message;
+        iconEl.textContent = icon;
+
+        okBtn.textContent = okText;
+        cancelBtn.textContent = cancelText;
+
+        okBtn.classList.remove("danger","ok","warn");
+
+if (danger) {
+  okBtn.classList.add("danger");
+} else if (icon === "⚠️" || icon === "✅") {
+  okBtn.classList.add("warn");
+} else {
+  okBtn.classList.add("ok");
+}
+
+
+        const finish = (val) => {
+          if (!this.open) return;
+          this.open = false;
+
+          overlay.classList.remove("active");
+          overlay.style.display = "none";
+          overlay.setAttribute("aria-hidden", "true");
+
+          okBtn.onclick = null;
+          cancelBtn.onclick = null;
+          closeBtn.onclick = null;
+
+          if (this.escHandler){
+            document.removeEventListener("keydown", this.escHandler);
+            this.escHandler = null;
+          }
+
+          const r = this.resolver;
+          this.resolver = null;
+          if (typeof r === "function") r(val);
+        };
+
+        okBtn.onclick = () => finish(true);
+        cancelBtn.onclick = () => finish(false);
+        closeBtn.onclick = () => finish(false);
+
+        overlay.onclick = (e) => {
+          if (e.target === overlay) finish(false);
+        };
+
+        this.escHandler = (e) => {
+          if (e.key === "Escape") finish(false);
+        };
+        document.addEventListener("keydown", this.escHandler);
+
+        overlay.style.display = "flex";
+        overlay.setAttribute("aria-hidden", "false");
+        // next tick for animation
+        requestAnimationFrame(() => overlay.classList.add("active"));
+
+        // focus ok for keyboard
+        setTimeout(() => okBtn.focus(), 50);
+      });
+    }
+  };
 
   /**********************
    * Storage helpers
@@ -1432,7 +1843,14 @@ input[type=number]{
       const status = $("adminPhotoStatus");
       if (!car?.id || !url) return;
 
-      const ok = confirm("Delete this photo? (no undo)");
+      const ok = await PAB_CONFIRM.show({
+        title: "Delete photo",
+        message: "Delete this photo? (no undo)",
+        okText: "Delete",
+        cancelText: "Cancel",
+        danger: true,
+        icon: "🗑"
+      });
       if (!ok) return;
 
       try{
@@ -1820,7 +2238,7 @@ input[type=number]{
   })();
 
   /**********************
-   * Inline edit controller (Specifications + Description)
+   * Inline edit controller (Top + Specifications + Description)
    **********************/
   const INLINE_EDIT = {
     editing: false,
@@ -1828,17 +2246,18 @@ input[type=number]{
     dirtyKeys: new Set(),
 
     init(){
-      const onEditClick = () => {
+      const onEditClick = async () => {
         if (!canSeeAdminNow()) return;
         if (!this.editing){
           this.enterEditMode();
         } else {
-          this.exitEditMode(false);
+          await this.exitEditMode(false);
         }
       };
 
       $("inlineEditBtn")?.addEventListener("click", onEditClick);
       $("aboutEditBtn")?.addEventListener("click", onEditClick);
+      $("topEditBtn")?.addEventListener("click", onEditClick);
 
       const onSaveClick = async () => {
         if (!canSeeAdminNow()) return;
@@ -1847,6 +2266,7 @@ input[type=number]{
 
       $("inlineSaveBtn")?.addEventListener("click", onSaveClick);
       $("aboutSaveBtn")?.addEventListener("click", onSaveClick);
+      $("topSaveBtn")?.addEventListener("click", onSaveClick);
     },
 
     enterEditMode(){
@@ -1857,14 +2277,21 @@ input[type=number]{
       this.updateEditButtonLabel();
     },
 
-    exitEditMode(force){
+    async exitEditMode(force){
       if (!this.editing) {
         this.resetUI();
         return;
       }
 
       if (!force && this.dirtyKeys.size > 0){
-        const ok = confirm("Discard your unsaved changes?");
+        const ok = await PAB_CONFIRM.show({
+          title: "Discard changes",
+          message: "Discard your unsaved changes?",
+          okText: "Discard",
+          cancelText: "Keep editing",
+          danger: true,
+          icon: "✖"
+        });
         if (!ok) return;
       }
 
@@ -1886,22 +2313,40 @@ input[type=number]{
       const label = this.editing ? "✖ Cancel edit" : "✏️ Edit fields";
       const btnA = $("inlineEditBtn");
       const btnB = $("aboutEditBtn");
+      const btnC = $("topEditBtn");
       if (btnA) btnA.textContent = label;
       if (btnB) btnB.textContent = label;
+      if (btnC) btnC.textContent = label;
     },
 
     toggleInputs(enable){
-      document.querySelectorAll(".spec-input").forEach(inp => {
-        inp.disabled = !enable;
-        inp.classList.toggle("editing", enable);
-      });
+  // Enable/disable all editable inputs you already have
+  document.querySelectorAll(".spec-input").forEach(inp => {
+    inp.disabled = !enable;
+    inp.classList.toggle("editing", enable);
+  });
 
-      const desc = $("descEdit");
-      if (desc){
-        desc.disabled = !enable;
-        desc.classList.toggle("editing", enable);
-      }
-    },
+  const desc = $("descEdit");
+  if (desc){
+    desc.disabled = !enable;
+    desc.classList.toggle("editing", enable);
+  }
+
+  // ✅ STEP #4: swap title/price display ↔ inputs (same place in header)
+  const tText = $("carTitleText");   // <h1> text
+  const pText = $("carPriceText");   // <div class="car-price"> text
+  const tInp  = $("carTitleInput");  // hidden input
+  const pInp  = $("carPriceInput");  // hidden input
+
+  if (canSeeAdminNow()){
+    if (tText) tText.style.display = enable ? "none" : "";
+    if (pText) pText.style.display = enable ? "none" : "";
+
+    if (tInp)  tInp.style.display  = enable ? "" : "none";
+    if (pInp)  pInp.style.display  = enable ? "" : "none";
+  }
+},
+
 
     setOriginalFromCar(car){
       const keys = [
@@ -1917,6 +2362,16 @@ input[type=number]{
       this.dirtyKeys.clear();
       this.editing = false;
       this.resetUI();
+
+      // also fill top inputs immediately
+      const t = $("topTitleInput");
+      const p = $("topPriceInput");
+      if (t) t.value = this.original.title ?? "";
+      if (p) p.value = this.original.price ?? "";
+      const tw = $("topTitleWas");
+      const pw = $("topPriceWas");
+      if (tw){ tw.textContent = ""; tw.classList.remove("show"); }
+      if (pw){ pw.textContent = ""; pw.classList.remove("show"); }
     },
 
     bindInputEvents(){
@@ -1961,6 +2416,24 @@ input[type=number]{
     },
 
     showWasForInput(inp, orig){
+      // top header inputs have their own "was" spots
+      if (inp.id === "topTitleInput"){
+        const was = $("topTitleWas");
+        if (was){
+          was.textContent = `was: ${orig || "empty"}`;
+          was.classList.add("show");
+        }
+        return;
+      }
+      if (inp.id === "topPriceInput"){
+        const was = $("topPriceWas");
+        if (was){
+          was.textContent = `was: ${orig || "empty"}`;
+          was.classList.add("show");
+        }
+        return;
+      }
+
       const wrap = inp.closest(".spec-item");
       if (!wrap) return;
       let was = wrap.querySelector(".spec-was");
@@ -1973,6 +2446,17 @@ input[type=number]{
       was.classList.add("show");
     },
     hideWasForInput(inp){
+      if (inp.id === "topTitleInput"){
+        const was = $("topTitleWas");
+        if (was){ was.classList.remove("show"); was.textContent = ""; }
+        return;
+      }
+      if (inp.id === "topPriceInput"){
+        const was = $("topPriceWas");
+        if (was){ was.classList.remove("show"); was.textContent = ""; }
+        return;
+      }
+
       const wrap = inp.closest(".spec-item");
       if (!wrap) return;
       const was = wrap.querySelector(".spec-was");
@@ -2020,20 +2504,25 @@ input[type=number]{
     updateSaveButton(){
       const saveA = $("inlineSaveBtn");
       const saveB = $("aboutSaveBtn");
+      const saveC = $("topSaveBtn");
       const showSave = this.dirtyKeys.size > 0;
 
       if (saveA) saveA.style.display = showSave ? "" : "none";
       if (saveB) saveB.style.display = showSave ? "" : "none";
+      if (saveC) saveC.style.display = showSave ? "" : "none";
 
       if (saveA) saveA.disabled = !(this.editing && this.dirtyKeys.size > 0);
       if (saveB) saveB.disabled = !(this.editing && this.dirtyKeys.size > 0);
+      if (saveC) saveC.disabled = !(this.editing && this.dirtyKeys.size > 0);
     },
 
     setStatus(text){
       const a = $("inlineEditStatus");
       const b = $("aboutInlineStatus");
+      const c = $("topInlineStatus");
       if (a) a.textContent = text || "";
       if (b) b.textContent = text || "";
+      if (c) c.textContent = text || "";
     },
 
     async saveChanges(){
@@ -2072,6 +2561,8 @@ input[type=number]{
         $("inlineEditBtn") && ($("inlineEditBtn").disabled = true);
         $("aboutSaveBtn") && ($("aboutSaveBtn").disabled = true);
         $("aboutEditBtn") && ($("aboutEditBtn").disabled = true);
+        $("topSaveBtn") && ($("topSaveBtn").disabled = true);
+        $("topEditBtn") && ($("topEditBtn").disabled = true);
 
         const { error } = await db.from("cars").update(payload).eq("id", car.id);
         if (error) throw error;
@@ -2087,6 +2578,8 @@ input[type=number]{
         $("inlineEditBtn") && ($("inlineEditBtn").disabled = false);
         $("aboutSaveBtn") && ($("aboutSaveBtn").disabled = false);
         $("aboutEditBtn") && ($("aboutEditBtn").disabled = false);
+        $("topSaveBtn") && ($("topSaveBtn").disabled = false);
+        $("topEditBtn") && ($("topEditBtn").disabled = false);
       }
     }
   };
@@ -2159,8 +2652,16 @@ input[type=number]{
     window.currentCar = car;
 
     const title = car.title || `${car.year||""} ${car.make||""} ${car.model||""}`.trim();
-    document.querySelector(".car-header h1").textContent = title || "Car";
-    document.querySelector(".car-price").textContent = car.price != null ? `$${car.price}` : "—";
+    const titleText = $("carTitleText");
+const priceText = $("carPriceText");
+const titleInput = $("carTitleInput");
+const priceInput = $("carPriceInput");
+
+if (titleText) titleText.textContent = title || "Car";
+if (priceText) priceText.textContent = car.price != null ? `$${car.price}` : "—";
+
+if (titleInput) titleInput.value = car.title ?? "";
+if (priceInput) priceInput.value = (car.price ?? "") + "";
 
     // you asked: remove Clean history, keep only miles
     document.querySelector(".car-meta").textContent = `${car.mileage ?? "—"} miles`;
@@ -2246,7 +2747,29 @@ input[type=number]{
       toggleSoldBtn.onclick = async () => {
         if (!canSeeAdminNow()) return;
         const nextStatus = (car.status === "sold") ? "available" : "sold";
-        const ok = confirm(`Set status to "${nextStatus}"?`);
+        toggleSoldBtn.onclick = async () => {
+  if (!canSeeAdminNow()) return;
+
+  const nextStatus = (car.status === "sold") ? "available" : "sold";
+
+  const ok = await PAB_CONFIRM.show({
+    title: (nextStatus === "sold") ? "Mark as sold" : "Unmark sold",
+    message: (nextStatus === "sold")
+      ? "Mark this car as SOLD?"
+      : "Unmark SOLD and set this car back to available?",
+    okText: (nextStatus === "sold") ? "Mark sold" : "Unmark",
+    cancelText: "Cancel",
+    danger: false,
+    icon: "✅"
+  });
+
+  if (!ok) return;
+
+  const { error } = await db.from("cars").update({ status: nextStatus }).eq("id", car.id);
+  if (error){ console.error(error); alert("Failed."); return; }
+  location.reload();
+};
+
         if (!ok) return;
 
         const { error } = await db.from("cars").update({ status: nextStatus }).eq("id", car.id);
@@ -2259,7 +2782,25 @@ input[type=number]{
     if (delBtn){
       delBtn.onclick = async () => {
         if (!canSeeAdminNow()) return;
-        const ok = confirm("Delete this car forever? (no undo)");
+        delBtn.onclick = async () => {
+  if (!canSeeAdminNow()) return;
+
+  const ok = await PAB_CONFIRM.show({
+    title: "Delete car",
+    message: "Delete this car forever? (no undo)",
+    okText: "Delete",
+    cancelText: "Cancel",
+    danger: true,
+    icon: "🗑"
+  });
+
+  if (!ok) return;
+
+  const { error } = await db.from("cars").delete().eq("id", car.id);
+  if (error){ console.error(error); alert("Failed."); return; }
+  window.location.href = "../index.html#cars";
+};
+
         if (!ok) return;
 
         const { error } = await db.from("cars").delete().eq("id", car.id);
