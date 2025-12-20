@@ -923,7 +923,7 @@
         card.querySelector('[data-action="mark-sold"]')?.addEventListener("click", async () => {
           if (!confirm(`Mark this car as sold?`)) return;
 
-          const { error } = await db.from("cars").update({ status: "unavailable" }).eq("id", car.id);
+          const { error } = await db.from("cars").update({ status: "sold" }).eq("id", car.id);
           if (error){ console.error(error); alert("Failed."); return; }
 
           // remove from index by reloading list (since we filter status === available)
