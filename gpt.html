@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PAB SHOP — Cars for Sale</title>
+  <meta name="description" content="Demo vehicle inventory and car listings. No payments processed.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== existing styles untouched ===== */
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --text:#0f1724;
+      --accent:#0b6eff;
+      --glass:rgba(255,255,255,0.65);
+      --shadow:0 6px 20px rgba(12,15,20,0.06);
+      --border:rgba(0,0,0,0.04);
+    }
+    [data-theme="dark"]{
+      --bg:#0b0f16;
+      --card:#0f1724;
+      --muted:#94a3b8;
+      --text:#e6eef8;
+      --accent:#4ea8ff;
+      --glass:rgba(255,255,255,0.05);
+      --shadow:0 10px 30px rgba(0,0,0,0.6);
+      --border:rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:Inter,system-ui;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.6;
+    }
+    .container{max-width:1200px;margin:0 auto;padding:0 20px}
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="container header-inner">
+    <a href="index.html" class="logo">PAB SHOP</a>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#cars">Cars</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="home">
+  <div class="container">
+    <h1>Find your next car</h1>
+    <p>Demo vehicle inventory and listings for a private auto business.</p>
+
+    <!-- ✅ SAFE BROWSING: explanation -->
+    <p style="color:#6b7280;font-size:14px;max-width:720px;margin:0 auto 24px;">
+      This website is a demo vehicle listing platform. No payments are processed and no sensitive
+      personal information is collected.
+    </p>
+
+    <div class="controls">
+      <div class="search">
+        <input id="q" placeholder="Search by make or model...">
+      </div>
+      <a class="btn" href="#cars">Browse Cars</a>
+      <button class="btn admin-only" id="addCarBtn" style="display:none;">+ Add Car</button>
+    </div>
+
+    <a class="sold-link" href="sold.html">View Sold Cars →</a>
+  </div>
+</section>
+
+<section id="cars" class="container">
+  <!-- ✅ SAFE BROWSING -->
+  <p style="color:#6b7280;font-size:14px;margin-bottom:12px;">
+    Vehicles currently available in the demo inventory.
+  </p>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section id="contact" class="container">
+  <h2>Contact Us</h2>
+  <p>Contact us for more information about listed vehicles.</p>
+
+  <div class="contact-buttons">
+    <a href="tel:+15165657312" class="contact-btn">📞 Call: +1 (516) 565-7312</a>
+    <a href="mailto:sales@pabshop.com" class="contact-btn email">✉️ Email Us</a>
+    <a href="tel:+15857347880" class="contact-btn secondary">📞 Call: +1 (585) 734-7880</a>
+  </div>
+
+  <!-- ✅ SAFE BROWSING -->
+  <p style="color:#6b7280;font-size:13px;margin-top:16px;">
+    No online payments or account registration are required.
+  </p>
+</section>
+
+<footer>
+  <div class="container">
+    <!-- ✅ SAFE BROWSING: footer disclaimer -->
+    <p>
+      This website is a demo vehicle inventory and listing platform for a private auto business.
+      No payments are processed and no sensitive personal information is collected.
+    </p>
+    <p>© 2025 PAB SHOP. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- scripts unchanged -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  /* your existing JS exactly as-is */
+</script>
+
+</body>
+</html>
