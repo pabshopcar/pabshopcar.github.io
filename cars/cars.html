@@ -1378,25 +1378,46 @@
 
     <div class="description" id="descriptionBox">
       <h2>About This Car</h2>
-      <p id="carDescription">Loading...</p>
 
-      <!-- admin inline edit description -->
-      <div class="admin-only" id="adminDescEditBox" style="display:none; margin-top:14px;">
-        <textarea id="descEdit" class="desc-textarea" disabled placeholder="Description..."></textarea>
-        <div id="descWas" class="spec-was" style="text-align:left;"></div>
+      <!-- DISPLAY (everyone sees this, preserves new lines) -->
+      <p id="carDescription" style="white-space:pre-wrap;">Loading...</p>
 
-        <!-- Duplicate controls here (same behavior as specs) -->
-        <div class="inline-edit-controls" id="aboutInlineEditControls" style="margin-top:14px;">
-          <div class="inline-edit-row">
-            <button id="aboutEditBtn" class="theme-btn admin-edit-btn" type="button">
-              ✏️ Edit fields
-            </button>
-            <button id="aboutSaveBtn" class="theme-btn admin-save-btn" type="button" style="display:none;">
-              ✅ Save
-            </button>
-          </div>
-          <div class="inline-status" id="aboutInlineStatus"></div>
+      <!-- EDIT (admin only, swaps in-place, matches display typography, auto-expands) -->
+      <textarea
+        id="descEdit"
+        class="desc-textarea admin-only"
+        data-key="description"
+        disabled
+        style="
+          display:none;
+          width:100%;
+          box-sizing:border-box;
+          white-space:pre-wrap;
+          overflow:hidden;
+          resize:none;
+          font: inherit;
+          font-size: inherit;
+          line-height: inherit;
+          color: inherit;
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 0;
+        "
+        placeholder="Description..."
+      ></textarea>
+
+      <!-- Controls live here, but NO separate editor panel -->
+      <div class="inline-edit-controls admin-only" id="aboutInlineEditControls" style="margin-top:14px; display:none;">
+        <div class="inline-edit-row">
+          <button id="aboutEditBtn" class="theme-btn admin-edit-btn" type="button">
+            ✏️ Edit fields
+          </button>
+          <button id="aboutSaveBtn" class="theme-btn admin-save-btn" type="button" style="display:none;">
+            ✅ Save
+          </button>
         </div>
+        <div class="inline-status" id="aboutInlineStatus"></div>
       </div>
     </div>
   </section>
@@ -1520,7 +1541,6 @@
   function getViewMode(){ return localStorage.getItem("viewMode") || "admin"; }
   function setViewMode(mode){
     localStorage.setItem("viewMode", mode);
-    // reload on view change
     location.reload();
   }
   function canSeeAdminNow(){
@@ -1546,6 +1566,33 @@
     }
   }
 
+  function autoResizeTextarea(el){
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = (el.scrollHeight) + "px";
+  }
+
+  function syncDescTextareaToDisplay(){
+    const descText = $("carDescription");
+    const desc = $("descEdit");
+    if (!descText || !desc) return;
+
+    // match spacing/typography so edit vs view doesn't look like two different websites
+    const cs = getComputedStyle(descText);
+    desc.style.fontFamily = cs.fontFamily;
+    desc.style.fontSize = cs.fontSize;
+    desc.style.fontWeight = cs.fontWeight;
+    desc.style.lineHeight = cs.lineHeight;
+    desc.style.letterSpacing = cs.letterSpacing;
+    desc.style.padding = cs.padding || "0";
+    desc.style.margin = "0";
+    desc.style.color = cs.color;
+
+    // give it breathing room similar to paragraph without changing layout outside it
+    if (!desc.style.padding || desc.style.padding === "0px") desc.style.padding = "0";
+    autoResizeTextarea(desc);
+  }
+
   function applyAdminView(){
     const adminEls = document.querySelectorAll(".admin-only");
     const canSee = canSeeAdminNow();
@@ -1557,12 +1604,14 @@
     const adminBox = $("carAdminActions");
     if (adminBox) adminBox.style.display = canSee ? "" : "none";
 
-    const descBox = $("adminDescEditBox");
-    if (descBox) descBox.style.display = canSee ? "" : "none";
-
-    // top inline controls in header
     const topControls = $("topInlineEditControls");
     if (topControls) topControls.style.display = canSee ? "" : "none";
+
+    const aboutControls = $("aboutInlineEditControls");
+    if (aboutControls) aboutControls.style.display = canSee ? "" : "none";
+
+    const desc = $("descEdit");
+    if (desc && !INLINE_EDIT.editing) desc.style.display = "none";
   }
 
   async function refreshAuthUI(){
@@ -1602,7 +1651,6 @@
     const { error } = await db.auth.signInWithPassword({ email, password });
     if (error){ console.error(error); return alert("Login failed."); }
     await refreshAuthUI();
-    // reload on login
     location.reload();
   }
 
@@ -1610,7 +1658,6 @@
     const { error } = await db.auth.signOut();
     if (error) console.error(error);
     await refreshAuthUI();
-    // reload on logout
     location.reload();
   }
 
@@ -2251,6 +2298,10 @@
       this.toggleInputs(true);
       this.updateSaveButton();
       this.updateEditButtonLabel();
+
+      // make textarea look identical and size itself properly
+      syncDescTextareaToDisplay();
+      autoResizeTextarea($("descEdit"));
     },
 
     async exitEditMode(force){
@@ -2301,10 +2352,20 @@
         inp.classList.toggle("editing", enable);
       });
 
+      // About This Car swap (green area becomes editable)
+      const descText = $("carDescription");
       const desc = $("descEdit");
-      if (desc){
-        desc.disabled = !enable;
-        desc.classList.toggle("editing", enable);
+      if (canSeeAdminNow()){
+        if (descText) descText.style.display = enable ? "none" : "";
+        if (desc){
+          desc.style.display = enable ? "" : "none";
+          desc.disabled = !enable;
+          desc.classList.toggle("editing", enable);
+          if (enable){
+            syncDescTextareaToDisplay();
+            autoResizeTextarea(desc);
+          }
+        }
       }
 
       // Swap header display ↔ inputs
@@ -2361,18 +2422,18 @@
       const desc = $("descEdit");
       if (desc){
         desc.addEventListener("input", () => {
+          autoResizeTextarea(desc);
+
           const key = "description";
-          const now = (desc.value ?? "").trim();
-          const orig = (this.original[key] ?? "").trim();
+          const now = (desc.value ?? "");
+          const orig = (this.original[key] ?? "");
 
           if (now !== orig){
             this.dirtyKeys.add(key);
             desc.classList.add("changed");
-            this.showWasForDesc(orig);
           } else {
             this.dirtyKeys.delete(key);
             desc.classList.remove("changed");
-            this.hideWasForDesc();
           }
           this.updateSaveButton();
         });
@@ -2401,29 +2462,13 @@
       }
     },
 
-    showWasForDesc(orig){
-      const was = $("descWas");
-      if (!was) return;
-      was.textContent = `was: ${orig || "empty"}`;
-      was.classList.add("show");
-    },
-    hideWasForDesc(){
-      const was = $("descWas");
-      if (!was) return;
-      was.classList.remove("show");
-      was.textContent = "";
-    },
-
     clearChangedMarks(){
       document.querySelectorAll(".spec-input").forEach(inp => {
         inp.classList.remove("changed");
         this.hideWasForInput(inp);
       });
       const desc = $("descEdit");
-      if (desc) {
-        desc.classList.remove("changed");
-        this.hideWasForDesc();
-      }
+      if (desc) desc.classList.remove("changed");
     },
 
     restoreOriginal(){
@@ -2433,7 +2478,10 @@
         inp.value = orig;
       });
       const desc = $("descEdit");
-      if (desc) desc.value = this.original["description"] ?? "";
+      if (desc){
+        desc.value = this.original["description"] ?? "";
+        autoResizeTextarea(desc);
+      }
     },
 
     updateSaveButton(){
@@ -2487,7 +2535,7 @@
 
       if (this.dirtyKeys.has("description")){
         const desc = $("descEdit");
-        payload.description = (desc?.value ?? "").trim();
+        payload.description = (desc?.value ?? "");
       }
 
       try{
@@ -2582,26 +2630,18 @@
     if (titleInput) titleInput.value = car.title ?? "";
     if (priceInput) priceInput.value = (car.price ?? "") + "";
 
-    // keep only miles
     const meta = document.querySelector(".car-meta");
     if (meta) meta.textContent = `${car.mileage ?? "—"} miles`;
 
+    // About This Car: display + editable textarea (same content)
     const descEl = $("carDescription");
-    if (descEl) descEl.textContent = car.description || "No description available.";
-
-    const adminDescBox = $("adminDescEditBox");
     const descEdit = $("descEdit");
-    if (adminDescBox && descEdit){
-      if (canSeeAdminNow()){
-        adminDescBox.style.display = "";
-        descEdit.value = car.description || "";
-        descEdit.disabled = true;
-        descEdit.classList.remove("editing","changed");
-        const was = $("descWas");
-        if (was){ was.textContent = ""; was.classList.remove("show"); }
-      } else {
-        adminDescBox.style.display = "none";
-      }
+    const descVal = car.description || "No description available.";
+    if (descEl) descEl.textContent = descVal;
+    if (descEdit){
+      descEdit.value = car.description || "";
+      syncDescTextareaToDisplay();
+      autoResizeTextarea(descEdit);
     }
 
     const mainImgEl = $("mainImg");
@@ -2733,6 +2773,14 @@
 
     await refreshAuthUI();
     await loadCar();
+
+    // resize on viewport changes too (keeps it visually consistent)
+    window.addEventListener("resize", () => {
+      if (INLINE_EDIT.editing) {
+        syncDescTextareaToDisplay();
+        autoResizeTextarea($("descEdit"));
+      }
+    });
 
     db.auth.onAuthStateChange(async () => {
       await refreshAuthUI();
