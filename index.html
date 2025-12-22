@@ -5,8 +5,19 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PAB SHOP — Cars for Sale</title>
   <meta name="description" content="Curated cars for sale — contact us directly to purchase.">
+
+  <!-- Faster font loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Sharing previews -->
+  <meta property="og:title" content="PAB SHOP — Cars for Sale">
+  <meta property="og:description" content="Clean listings. Clear pricing. Direct contact.">
+  <meta property="og:type" content="website">
+
   <meta name="google-site-verification" content="evnpLoU4TEYreEXpPrIDMKN0ASQL9bB6PMvvnywPwNU" />
+
   <style>
     :root{
       --bg:#f6f7fb;
@@ -145,6 +156,7 @@
       width:90%;
       transform:scale(0.8) translateY(-20px);
       transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      outline:none;
     }
     .settings-overlay.active .settings-modal{
       transform:scale(1) translateY(0);
@@ -313,6 +325,7 @@
     }
 
     #cars{padding:50px 20px}
+
     .grid{
       display:grid;
       grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
@@ -345,6 +358,7 @@
       height:100%;
       object-fit:cover;
       transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);
+      display:block;
     }
     .card:hover img{transform:scale(1.1)}
 
@@ -712,6 +726,26 @@
     .pab-confirm-btn.danger:hover{ transform:translateY(-2px); box-shadow:0 8px 25px rgba(220,38,38,0.45); }
     /* ====== end confirm modal ====== */
 
+    /* status + loader */
+    .grid-status{
+      margin-top:18px;
+      text-align:center;
+      color:var(--muted);
+      font-weight:700;
+      display:none;
+    }
+    .grid-status.show{ display:block; }
+    .grid-spinner{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      border:3px solid rgba(127,127,127,0.18);
+      border-top-color: var(--accent);
+      margin:12px auto 0;
+      animation:spin 0.9s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+
     @media(max-width:768px){
       .header-inner{padding:12px 0 }
       nav{
@@ -773,18 +807,18 @@
       <a href="#cars">Cars</a>
       <a href="#contact">Contact</a>
     </nav>
-    <button id="settingsToggle" class="settings-toggle">
+    <button id="settingsToggle" class="settings-toggle" aria-haspopup="dialog" aria-controls="settingsOverlay">
       <span class="settings-icon">⚙️</span>
     </button>
   </div>
 </header>
 
 <!-- Settings Modal -->
-<div class="settings-overlay" id="settingsOverlay">
-  <div class="settings-modal">
+<div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="settings-modal" tabindex="-1" aria-label="Settings">
     <div class="settings-header">
       <h2>Settings</h2>
-      <button class="close-btn" id="closeSettings">×</button>
+      <button class="close-btn" id="closeSettings" aria-label="Close settings">×</button>
     </div>
 
     <div class="settings-section">
@@ -795,7 +829,7 @@
       </div>
     </div>
 
-    <!-- ✅ NEW: Layout toggle visible for everyone -->
+    <!-- ✅ Layout toggle visible for everyone -->
     <div class="settings-section">
       <h3>Mobile Layout</h3>
       <div class="theme-buttons">
@@ -840,11 +874,11 @@
 </div>
 
 <!-- Add Car Modal -->
-<div class="settings-overlay" id="addCarOverlay">
-  <div class="settings-modal" style="max-width:520px;">
+<div class="settings-overlay" id="addCarOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="settings-modal" style="max-width:520px;" tabindex="-1" aria-label="Add car">
     <div class="settings-header">
       <h2>Add Car</h2>
-      <button class="close-btn" id="closeAddCar">×</button>
+      <button class="close-btn" id="closeAddCar" aria-label="Close add car">×</button>
     </div>
 
     <p class="modal-note">All fields are optional. Blank values won’t break the listing.</p>
@@ -897,7 +931,7 @@
     <p>Clean listings. Clear pricing. Direct contact.</p>
 
     <div class="controls">
-      <div class="search"><input id="q" placeholder="Search by make or model..."></div>
+      <div class="search"><input id="q" placeholder="Search by make, model, year..." autocomplete="off"></div>
       <a class="btn" href="#cars">Browse Cars</a>
 
       <button class="btn admin-only" id="addCarBtn" style="display:none;">
@@ -911,6 +945,7 @@
 
 <section id="cars" class="container">
   <div class="grid" id="grid"></div>
+  <div id="gridStatus" class="grid-status" aria-live="polite"></div>
 </section>
 
 <section id="contact" class="container">
@@ -965,7 +1000,7 @@
   const savedTheme = localStorage.getItem('theme') || 'dark';
   root.setAttribute('data-theme', savedTheme);
 
-  const savedMobileGrid = localStorage.getItem('mobileGrid') || 'single'; // default stays 1-per-row
+  const savedMobileGrid = localStorage.getItem('mobileGrid') || 'single';
   root.setAttribute('data-mobile-grid', savedMobileGrid);
 
   function updateThemeButtons() {
@@ -1010,27 +1045,13 @@
   });
 
   /**********************
-   * Settings modal
-   **********************/
-  const settingsToggle = document.getElementById('settingsToggle');
-  const settingsOverlay = document.getElementById('settingsOverlay');
-  const closeSettings = document.getElementById('closeSettings');
-
-  settingsToggle.onclick = () => settingsOverlay.classList.add('active');
-  closeSettings.onclick = () => settingsOverlay.classList.remove('active');
-  settingsOverlay.onclick = (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.remove('active'); };
-
-  /**********************
    * View mode helpers
    **********************/
   function getViewMode(){ return localStorage.getItem("viewMode") || "admin"; }
-
-  // ✅ Requirement #1: reload on view switch
   function setViewMode(mode){
     localStorage.setItem("viewMode", mode);
     location.reload();
   }
-
   function canSeeAdminNow(){
     return window.isAdmin && (getViewMode() !== "user");
   }
@@ -1090,7 +1111,6 @@
     updateViewButtons();
   }
 
-  // ✅ Requirement #2: reload on login/logout
   async function loginOwner(){
     const email = $("adminEmail")?.value?.trim();
     const password = $("adminPassword")?.value;
@@ -1145,7 +1165,7 @@
 
         okBtn.classList.remove("danger","ok","warn");
         if (danger) okBtn.classList.add("danger");
-        else okBtn.classList.add("warn"); // sold looks yellow here
+        else okBtn.classList.add("warn");
 
         const finish = (val) => {
           if (!this.open) return;
@@ -1173,13 +1193,9 @@
         cancelBtn.onclick = () => finish(false);
         closeBtn.onclick = () => finish(false);
 
-        overlay.onclick = (e) => {
-          if (e.target === overlay) finish(false);
-        };
+        overlay.onclick = (e) => { if (e.target === overlay) finish(false); };
 
-        this.escHandler = (e) => {
-          if (e.key === "Escape") finish(false);
-        };
+        this.escHandler = (e) => { if (e.key === "Escape") finish(false); };
         document.addEventListener("keydown", this.escHandler);
 
         overlay.style.display = "flex";
@@ -1193,6 +1209,8 @@
   /**********************
    * Helpers
    **********************/
+  const NF = new Intl.NumberFormat("en-US");
+
   function normalizeDigits(str){
     return String(str || "").replace(/[^\d]/g, "").trim();
   }
@@ -1201,108 +1219,353 @@
     if (p === null || p === undefined || p === "") return "Call for price";
     const n = Number(p);
     if (!Number.isFinite(n)) return "Call for price";
-    return `$${n}`;
+    return `$${NF.format(Math.round(n))}`;
+  }
+
+  function formatMileage(m){
+    if (m === null || m === undefined || m === "") return "";
+    const n = Number(m);
+    if (!Number.isFinite(n)) return "";
+    return `${NF.format(Math.round(n))} mi`;
+  }
+
+  function escapeHtml(str){
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function setGridStatus(text, spinner=false){
+    const el = document.getElementById("gridStatus");
+    if (!el) return;
+    if (!text){
+      el.classList.remove("show");
+      el.innerHTML = "";
+      return;
+    }
+    el.classList.add("show");
+    el.innerHTML = escapeHtml(text) + (spinner ? `<div class="grid-spinner" aria-hidden="true"></div>` : ``);
+  }
+
+  function debounce(fn, wait=220){
+    let t = null;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), wait);
+    };
+  }
+
+  function uniq(arr){ return Array.from(new Set((arr || []).filter(Boolean))); }
+
+  function urlToStoragePath(url){
+    const marker = "/storage/v1/object/public/cars/";
+    const idx = String(url || "").indexOf(marker);
+    if (idx === -1) return null;
+    return String(url).substring(idx + marker.length);
+  }
+
+  function deriveCardImageUrl(url){
+    const s = String(url || "");
+    if (!s) return s;
+    if (s.includes("/card/")) return s;
+    if (s.includes("/full/")) return s.replace("/full/", "/card/");
+    if (s.includes("/thumb/")) return s.replace("/thumb/", "/card/");
+    return s;
+  }
+
+  function deriveFallbackFullUrl(url){
+    const s = String(url || "");
+    if (s.includes("/card/")) return s.replace("/card/", "/full/");
+    if (s.includes("/thumb/")) return s.replace("/thumb/", "/full/");
+    return s;
+  }
+
+  async function deleteAllCarImagesFromStorage(car){
+    const urls = uniq([...(car?.images || []), car?.cover_image]);
+    const paths = uniq(urls.map(urlToStoragePath).filter(Boolean));
+
+    const extra = [];
+    for (const p of paths){
+      if (p.includes("/full/")){
+        extra.push(p.replace("/full/","/thumb/"));
+        extra.push(p.replace("/full/","/card/"));
+      }
+      if (p.includes("/thumb/")){
+        extra.push(p.replace("/thumb/","/full/"));
+        extra.push(p.replace("/thumb/","/card/"));
+      }
+      if (p.includes("/card/")){
+        extra.push(p.replace("/card/","/full/"));
+        extra.push(p.replace("/card/","/thumb/"));
+      }
+    }
+
+    const all = uniq([...paths, ...extra]).filter(Boolean);
+    if (!all.length) return;
+
+    const { error } = await db.storage.from("cars").remove(all);
+    if (error) throw error;
+  }
+
+  function buildSearchText(car){
+    const parts = [
+      car?.title,
+      car?.make,
+      car?.model,
+      car?.year,
+      car?.engine,
+      car?.transmission,
+      car?.drivetrain,
+      car?.exterior_color,
+      car?.interior_color
+    ].filter(Boolean);
+    return parts.join(" ").toLowerCase();
+  }
+
+  function getCoverUrls(car){
+    const cover = car?.cover_image || DEFAULT_COVER;
+    if (!cover || cover === DEFAULT_COVER){
+      return { primary: DEFAULT_COVER, fallback: DEFAULT_COVER };
+    }
+    const primary = deriveCardImageUrl(cover);
+    const fallback = deriveFallbackFullUrl(primary) || cover;
+    return { primary, fallback };
   }
 
   /**********************
-   * Cars grid
+   * Cars grid (paged + infinite)
    **********************/
-  async function loadCars(){
-    const { data, error } = await db.from("cars").select("*");
-    if (error) {
-      console.error(error);
-      return;
+  const GRID_STATE = {
+    pageSize: 10,
+    offset: 0,
+    loading: false,
+    done: false,
+    allLoadedCars: [],
+    search: "",
+    observer: null
+  };
+
+  function createCard(car){
+    const showAdminControls = canSeeAdminNow();
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.search = buildSearchText(car);
+
+    card.addEventListener("click", () => {
+      window.location.href = `cars/cars.html?id=${car.id}`;
+    });
+
+    const title = car.title || "Untitled Car";
+    const { primary, fallback } = getCoverUrls(car);
+    const mileageLine = formatMileage(car.mileage);
+    const priceLine = formatPrice(car.price);
+
+    card.innerHTML = `
+      <div class="card-img-wrap">
+        <img
+          src="${escapeHtml(primary)}"
+          data-fallback="${escapeHtml(fallback)}"
+          alt="${escapeHtml(title)}"
+          loading="lazy"
+          decoding="async"
+          width="1200"
+          height="675"
+        >
+      </div>
+      <div class="card-body">
+        <h3>${escapeHtml(title)}</h3>
+        <div class="price">${escapeHtml(priceLine)}</div>
+        <p>${escapeHtml(mileageLine)}</p>
+
+        ${showAdminControls ? `
+          <div class="action-buttons admin-only">
+            <button class="action-btn sold" data-action="mark-sold" type="button">Mark Sold</button>
+            <button class="action-btn delete" data-action="delete" type="button">Delete</button>
+          </div>
+        ` : ``}
+      </div>
+    `;
+
+    const img = card.querySelector("img");
+    if (img){
+      img.addEventListener("error", () => {
+        const fb = img.getAttribute("data-fallback");
+        if (fb && img.src !== fb) img.src = fb;
+      }, { once:true });
     }
 
-    const cars = (data || []).filter(c => (c.status || "available") === "available");
-    const container = document.getElementById("grid");
-    container.innerHTML = "";
+    if (showAdminControls){
+      card.querySelectorAll("button").forEach(btn => btn.addEventListener("click", e => e.stopPropagation()));
 
-    const showAdminControls = canSeeAdminNow();
+      card.querySelector('[data-action="mark-sold"]')?.addEventListener("click", async () => {
+        const ok = await PAB_CONFIRM.show({
+          title: "Mark as sold",
+          message: "Mark this car as SOLD? It will no longer appear as available.",
+          okText: "Mark Sold",
+          cancelText: "Cancel",
+          danger: false,
+          icon: "⚠️"
+        });
+        if (!ok) return;
 
-    cars.forEach(car => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.setAttribute("data-title", (car.title || "").toLowerCase());
+        const { error } = await db.from("cars").update({ status: "sold" }).eq("id", car.id);
+        if (error){ console.error(error); alert("Failed."); return; }
 
-      card.addEventListener("click", () => {
-        window.location.href = `cars/cars.html?id=${car.id}`;
+        GRID_STATE.allLoadedCars = GRID_STATE.allLoadedCars.filter(c => c.id !== car.id);
+        renderAll();
       });
 
-      const title = car.title || "Untitled Car";
-      const cover = car.cover_image || DEFAULT_COVER;
-
-      const mileageLine = (car.mileage || car.mileage === 0) ? `${car.mileage} mi` : "";
-      const priceLine = formatPrice(car.price);
-
-      card.innerHTML = `
-        <div class="card-img-wrap">
-          <img src="${cover}" alt="${title}">
-        </div>
-        <div class="card-body">
-          <h3>${title}</h3>
-          <div class="price">${priceLine}</div>
-          <p>${mileageLine}</p>
-
-          ${showAdminControls ? `
-            <div class="action-buttons admin-only">
-              <button class="action-btn sold" data-action="mark-sold" type="button">Mark Sold</button>
-              <button class="action-btn delete" data-action="delete" type="button">Delete</button>
-            </div>
-          ` : ``}
-        </div>
-      `;
-
-      if (showAdminControls){
-        card.querySelectorAll("button").forEach(btn => btn.addEventListener("click", e => e.stopPropagation()));
-
-        card.querySelector('[data-action="mark-sold"]')?.addEventListener("click", async () => {
-          const ok = await PAB_CONFIRM.show({
-            title: "Mark as sold",
-            message: "Mark this car as SOLD? It will no longer appear as available.",
-            okText: "Mark Sold",
-            cancelText: "Cancel",
-            danger: false,
-            icon: "⚠️"
-          });
-          if (!ok) return;
-
-          const { error } = await db.from("cars").update({ status: "sold" }).eq("id", car.id);
-          if (error){ console.error(error); alert("Failed."); return; }
-          loadCars();
+      card.querySelector('[data-action="delete"]')?.addEventListener("click", async () => {
+        const ok = await PAB_CONFIRM.show({
+          title: "Delete car",
+          message: "Delete this car AND all its photos? (no undo)",
+          okText: "Delete",
+          cancelText: "Cancel",
+          danger: true,
+          icon: "🗑"
         });
+        if (!ok) return;
 
-        card.querySelector('[data-action="delete"]')?.addEventListener("click", async () => {
-          const ok = await PAB_CONFIRM.show({
-            title: "Delete car",
-            message: "Delete this car forever? (no undo)",
-            okText: "Delete",
-            cancelText: "Cancel",
-            danger: true,
-            icon: "🗑"
-          });
-          if (!ok) return;
-
+        try{
+          await deleteAllCarImagesFromStorage(car);
           const { error } = await db.from("cars").delete().eq("id", car.id);
-          if (error){ console.error(error); alert("Failed."); return; }
-          loadCars();
-        });
-      }
+          if (error) throw error;
 
-      container.insertBefore(card, container.firstChild);
-    });
+          GRID_STATE.allLoadedCars = GRID_STATE.allLoadedCars.filter(c => c.id !== car.id);
+          renderAll();
+        } catch(err){
+          console.error(err);
+          alert("Delete failed. Check console.");
+        }
+      });
+    }
 
-    applyAdminView();
+    return card;
   }
 
-  // Search filter
-  document.getElementById('q').addEventListener('input', e => {
-    const v = e.target.value.toLowerCase();
-    const cardsOnPage = document.querySelectorAll('#grid .card');
-    cardsOnPage.forEach(c => {
-      c.style.display = (c.dataset.title || "").includes(v) ? '' : 'none';
+  function renderAll(){
+    const grid = document.getElementById("grid");
+    if (!grid) return;
+
+    grid.innerHTML = "";
+
+    const term = GRID_STATE.search.toLowerCase().trim();
+    const filtered = term
+      ? GRID_STATE.allLoadedCars.filter(c => buildSearchText(c).includes(term))
+      : GRID_STATE.allLoadedCars.slice();
+
+    if (term && !filtered.length){
+      setGridStatus("No results found.", false);
+    } else if (!GRID_STATE.loading && GRID_STATE.done && !term){
+      setGridStatus("You reached the end.", false);
+    } else if (!GRID_STATE.loading && !filtered.length && GRID_STATE.done){
+      setGridStatus("No cars available.", false);
+    } else {
+      setGridStatus("", false);
+    }
+
+    const frag = document.createDocumentFragment();
+    filtered.forEach(car => frag.appendChild(createCard(car)));
+    grid.appendChild(frag);
+
+    applyAdminView();
+    rewireInfiniteObserver();
+  }
+
+  async function fetchNextPage(){
+    if (GRID_STATE.loading || GRID_STATE.done) return;
+    GRID_STATE.loading = true;
+
+    setGridStatus(GRID_STATE.allLoadedCars.length ? "Loading more…" : "Loading cars…", true);
+
+    try{
+      const from = GRID_STATE.offset;
+      const to = GRID_STATE.offset + GRID_STATE.pageSize - 1;
+
+      let res = await db
+        .from("cars")
+        .select("*")
+        .eq("status", "available")
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      if (res.error){
+        console.warn("Order by created_at failed, falling back:", res.error);
+        res = await db
+          .from("cars")
+          .select("*")
+          .eq("status", "available")
+          .range(from, to);
+      }
+
+      const { data, error } = res;
+      if (error) throw error;
+
+      const batch = (data || []);
+      if (!batch.length){
+        GRID_STATE.done = true;
+        GRID_STATE.loading = false;
+        renderAll();
+        return;
+      }
+
+      GRID_STATE.offset += batch.length;
+
+      // de-dupe just in case
+      const existing = new Set(GRID_STATE.allLoadedCars.map(c => c.id));
+      batch.forEach(c => { if (!existing.has(c.id)) GRID_STATE.allLoadedCars.push(c); });
+
+      GRID_STATE.loading = false;
+      renderAll();
+    } catch(err){
+      console.error(err);
+      GRID_STATE.loading = false;
+      setGridStatus("Couldn’t load inventory. Try again.", false);
+    }
+  }
+
+  function rewireInfiniteObserver(){
+    if (GRID_STATE.observer){
+      GRID_STATE.observer.disconnect();
+      GRID_STATE.observer = null;
+    }
+
+    // don't infinite-load while searching
+    if (GRID_STATE.search.trim()) return;
+    if (GRID_STATE.loading || GRID_STATE.done) return;
+
+    const cards = Array.from(document.querySelectorAll("#grid .card"));
+    if (!cards.length) return;
+
+    const idx = Math.max(0, cards.length - 5);
+    const target = cards[idx];
+    if (!target) return;
+
+    GRID_STATE.observer = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)){
+        fetchNextPage();
+      }
+    }, {
+      root: null,
+      threshold: 0.1,
+      rootMargin: "600px 0px"
     });
-  });
+
+    GRID_STATE.observer.observe(target);
+  }
+
+  /**********************
+   * Search filter (debounced)
+   **********************/
+  const onSearch = debounce((val) => {
+    GRID_STATE.search = String(val || "");
+    renderAll();
+  }, 220);
+
+  document.getElementById("q")?.addEventListener("input", (e) => onSearch(e.target.value));
 
   /**********************
    * Add Car modal
@@ -1324,38 +1587,84 @@
     if (e.target.id === "addCarOverlay") closeAddCar();
   });
 
+  // Prevent double-submit + make it appear instantly
+  let ADDING_CAR = false;
+
   document.getElementById("submitAddCar")?.addEventListener("click", async () => {
     if (!canSeeAdminNow()) return;
+    if (ADDING_CAR) return;
 
-    const title = document.getElementById("newCarTitle")?.value?.trim() || "Untitled Car";
-
-    const priceRaw = normalizeDigits(document.getElementById("newCarPrice")?.value);
-    const price = priceRaw === "" ? null : Number(priceRaw);
-    const safePrice = Number.isFinite(price) ? price : null;
-
-    const mileageRaw = normalizeDigits(document.getElementById("newCarMileage")?.value);
-    const mileage = mileageRaw === "" ? null : Number(mileageRaw);
-    const safeMileage = Number.isFinite(mileage) ? mileage : null;
-
-    const payload = {
-      title,
-      price: safePrice,
-      mileage: safeMileage,
-      status: "available",
-      cover_image: DEFAULT_COVER,
-      images: [],
-      description: ""
-    };
-
-    const { error } = await db.from("cars").insert([payload]).select();
-    if (error) {
-      console.error("INSERT ERROR:", error);
-      alert("Add car failed: " + (error.message || "unknown error"));
-      return;
+    ADDING_CAR = true;
+    const submitBtn = document.getElementById("submitAddCar");
+    const oldText = submitBtn?.textContent || "Add";
+    if (submitBtn){
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Adding…";
+      submitBtn.style.opacity = "0.85";
+      submitBtn.style.cursor = "not-allowed";
     }
 
-    closeAddCar();
-    loadCars();
+    try{
+      const title = document.getElementById("newCarTitle")?.value?.trim() || "Untitled Car";
+
+      const priceRaw = normalizeDigits(document.getElementById("newCarPrice")?.value);
+      const price = priceRaw === "" ? null : Number(priceRaw);
+      const safePrice = Number.isFinite(price) ? price : null;
+
+      const mileageRaw = normalizeDigits(document.getElementById("newCarMileage")?.value);
+      const mileage = mileageRaw === "" ? null : Number(mileageRaw);
+      const safeMileage = Number.isFinite(mileage) ? mileage : null;
+
+      const payload = {
+        title,
+        price: safePrice,
+        mileage: safeMileage,
+        status: "available",
+        cover_image: DEFAULT_COVER,
+        images: [],
+        description: ""
+      };
+
+      const { data, error } = await db.from("cars").insert([payload]).select();
+      if (error) {
+        console.error("INSERT ERROR:", error);
+        alert("Add car failed: " + (error.message || "unknown error"));
+        return;
+      }
+
+      closeAddCar();
+
+      const created = Array.isArray(data) ? data[0] : null;
+      if (created && created.id){
+        // ensure it shows immediately at the top, even with paging
+        GRID_STATE.search = "";
+        const q = document.getElementById("q");
+        if (q) q.value = "";
+
+        GRID_STATE.allLoadedCars = GRID_STATE.allLoadedCars.filter(c => c.id !== created.id);
+        GRID_STATE.allLoadedCars.unshift(created);
+
+        // keep paging from skipping a row
+        GRID_STATE.offset = Math.max(0, GRID_STATE.offset + 1);
+
+        renderAll();
+      } else {
+        // fallback refresh
+        GRID_STATE.offset = 0;
+        GRID_STATE.done = false;
+        GRID_STATE.allLoadedCars = [];
+        GRID_STATE.search = "";
+        await fetchNextPage();
+      }
+    } finally{
+      ADDING_CAR = false;
+      if (submitBtn){
+        submitBtn.disabled = false;
+        submitBtn.textContent = oldText;
+        submitBtn.style.opacity = "";
+        submitBtn.style.cursor = "";
+      }
+    }
   });
 
   /**********************
@@ -1384,11 +1693,23 @@
     updateViewButtons();
 
     await refreshAuthUI();
-    await loadCars();
+
+    // initial load: first 10 cars
+    GRID_STATE.offset = 0;
+    GRID_STATE.done = false;
+    GRID_STATE.loading = false;
+    GRID_STATE.allLoadedCars = [];
+    GRID_STATE.search = "";
+    const q = document.getElementById("q");
+    if (q) q.value = "";
+    document.getElementById("grid").innerHTML = "";
+    setGridStatus("Loading cars…", true);
+    await fetchNextPage();
 
     db.auth.onAuthStateChange(async () => {
       await refreshAuthUI();
-      loadCars();
+      // No refetch needed, just re-render so admin buttons show/hide correctly
+      renderAll();
     });
   });
 </script>
