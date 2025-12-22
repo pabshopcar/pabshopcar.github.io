@@ -1132,6 +1132,37 @@
   }
 
   /**********************
+   * Settings modal (FIX)
+   **********************/
+  let LAST_FOCUSED_EL = null;
+
+  function openSettings(){
+    const overlay = $("settingsOverlay");
+    if (!overlay) return;
+
+    LAST_FOCUSED_EL = document.activeElement;
+
+    overlay.classList.add("active");
+    overlay.setAttribute("aria-hidden", "false");
+
+    const modal = overlay.querySelector(".settings-modal");
+    if (modal) setTimeout(() => modal.focus(), 0);
+  }
+
+  function closeSettings(){
+    const overlay = $("settingsOverlay");
+    if (!overlay) return;
+
+    overlay.classList.remove("active");
+    overlay.setAttribute("aria-hidden", "true");
+
+    if (LAST_FOCUSED_EL && typeof LAST_FOCUSED_EL.focus === "function"){
+      try { LAST_FOCUSED_EL.focus(); } catch(_) {}
+    }
+    LAST_FOCUSED_EL = null;
+  }
+
+  /**********************
    * Pretty confirm modal helper
    **********************/
   const PAB_CONFIRM = {
@@ -1673,6 +1704,19 @@
   document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("loginBtn")?.addEventListener("click", loginOwner);
     document.getElementById("logoutBtn")?.addEventListener("click", logoutOwner);
+
+    // ✅ FIX: Settings button wiring
+    $("settingsToggle")?.addEventListener("click", openSettings);
+    $("closeSettings")?.addEventListener("click", closeSettings);
+    $("settingsOverlay")?.addEventListener("click", (e) => {
+      if (e.target && e.target.id === "settingsOverlay") closeSettings();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        const overlay = $("settingsOverlay");
+        if (overlay && overlay.classList.contains("active")) closeSettings();
+      }
+    });
 
     document.getElementById("showOwnerLoginBtn")?.addEventListener("click", () => {
       const adminSection = document.getElementById("adminSection");
