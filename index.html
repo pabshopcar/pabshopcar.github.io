@@ -1345,8 +1345,9 @@
 
   function cloudinaryCardUrl(publicId){
     const pid = cloudinaryEncodeId(publicId);
-    return `https://res.cloudinary.com/${CLOUDINARY.cloudName}/image/upload/f_auto,q_auto,w_900,c_fill/${pid}`;
+    return `https://res.cloudinary.com/${CLOUDINARY.cloudName}/image/upload/f_auto,q_auto,w_700,c_fill/${pid}`;
   }
+
 
   function cloudinaryFullUrl(publicId){
     const pid = cloudinaryEncodeId(publicId);

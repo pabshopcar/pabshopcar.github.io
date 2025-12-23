@@ -224,8 +224,35 @@
     object-fit:contain;
     background:var(--bg);
     cursor:pointer;
-    transition:transform 0.3s ease;
+    /* JS controls transforms for swipe */
+    transition:none;
   }
+
+  /* Swipe gallery: during drag you can see the next/prev image underneath (Marketplace-style) */
+  .main-media{ position:relative; overflow:hidden; touch-action:pan-y; }
+  .swipe-ghost{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    /* Transparent background so the fullscreen ghost inherits the
+       overlay backdrop instead of showing a card colour */
+    background:var(--bg);
+    pointer-events:none;
+    opacity:0;
+  }
+
+  /* Ensure the swipe ghost inside the fullscreen overlay uses a
+     transparent background.  Without this override the ghost can
+     inadvertently show the page colour during transitions. */
+  .fullscreen-overlay .swipe-ghost{
+    background:transparent;
+  }
+  /* Adjust the duration of the swipe animation to slow down the slide
+     transitions.  A longer duration provides a smoother, less abrupt
+     transition between images. */
+  .swipe-anim{ transition: transform 250ms ease; }
 
   .slider-btn{
     position:absolute; top:50%;
@@ -273,65 +300,91 @@
 
   /* Fullscreen modal (USER VIEW) */
   .fullscreen-overlay{
-    position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.95);
+    /* Fixed full-screen overlay covering the entire viewport.  Use a
+       solid black backdrop like the reference video.  Align items
+       to the top and centre horizontally so the image sits below
+       the header (close button and counter). */
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#000;
     z-index:2000;
     display:none;
-    align-items:center; justify-content:center;
+    /* Center content vertically in fullscreen mode so the image appears
+       centered regardless of header overlay.  This change aligns
+       items to the center instead of the top without affecting other
+       properties. */
+    align-items:center;
+    justify-content:center;
     opacity:0;
     transition:opacity 0.3s ease;
+    /* Disable default touch actions (like scrolling) so that drag
+       gestures don't scroll the page behind the overlay. */
+    touch-action:none;
   }
   .fullscreen-overlay.active{ display:flex; opacity:1; }
-  .fullscreen-img{ max-width:90%; max-height:90%; object-fit:contain; }
+  .fullscreen-img{
+    /* Make the fullscreen image fill the available space while
+       reserving vertical room for the header.  Remove the default
+       90% sizing so it can grow to full width. */
+    max-width:100%;
+    max-height:100%;
+    margin-top:0;
+    object-fit:contain;
+  }
   .fullscreen-close{
+    /* Simplify the close button: move it to the top-left corner,
+       remove decorative backgrounds and borders, and display a plain
+       white × glyph. */
     position:absolute;
-    top:20px; right:30px;
-    font-size:40px;
+    top:20px;
+    left:20px;
+    font-size:32px;
     color:#fff;
     cursor:pointer;
-    background:rgba(0,0,0,0.5);
-    width:50px; height:50px;
-    border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    transition:all 0.3s ease;
-    border:2px solid rgba(255,255,255,0.3);
-    z-index:2001;
-  }
-  .fullscreen-close:hover{ background:rgba(0,0,0,0.8); transform:rotate(90deg); }
-  .fullscreen-nav{
-    position:absolute;
-    top:50%;
-    transform:translateY(-50%);
-    background:linear-gradient(135deg,var(--accent),#2b8fff);
+    background:none;
     border:none;
-    width:60px; height:60px;
-    border-radius:50%;
-    cursor:pointer;
-    font-size:30px;
-    display:flex; align-items:center; justify-content:center;
-    transition:all 0.3s ease;
-    box-shadow:0 4px 15px rgba(11,110,255,0.5);
+    width:auto;
+    height:auto;
+    border-radius:0;
+    display:block;
+    line-height:1;
     z-index:2001;
-    color:#fff;
+    transition:color 0.3s ease;
   }
-  .fullscreen-nav:hover{ transform:translateY(-50%) scale(1.15); box-shadow:0 8px 25px rgba(11,110,255,0.7); }
-  .fullscreen-nav:active{ transform:translateY(-50%) scale(1.05); }
-  .fullscreen-nav.prev{left:30px}
-  .fullscreen-nav.next{right:30px}
+  .fullscreen-close:hover{
+    /* Lighten the icon slightly on hover without rotating it. */
+    color:#aaa;
+  }
+  .fullscreen-nav{
+    /* Hide navigation arrows in fullscreen mode by default.  They
+       will be made visible on larger screens via media queries
+       below. */
+    display:none;
+  }
+  .fullscreen-nav:hover{}
+  .fullscreen-nav:active{}
+  .fullscreen-nav.prev{}
+  .fullscreen-nav.next{}
   .fullscreen-counter{
+    /* Place the slide counter at the top centre with no extra
+       decoration.  Use simple white text and remove gradient
+       backgrounds, borders and drop shadows. */
     position:absolute;
-    bottom:30px;
+    top:20px;
     left:50%;
     transform:translateX(-50%);
-    background:linear-gradient(135deg,var(--accent),#2b8fff);
+    background:none;
     color:#fff;
-    padding:12px 28px;
-    border-radius:25px;
+    padding:0;
+    border-radius:0;
     font-size:16px;
-    font-weight:700;
+    font-weight:400;
     z-index:2001;
-    box-shadow:0 4px 15px rgba(11,110,255,0.5);
-    letter-spacing:1px;
+    box-shadow:none;
+    letter-spacing:normal;
   }
 
   /* Thumbs (saved images only) */
@@ -1142,9 +1195,58 @@
     .fullscreen-nav{ width:45px; height:45px; font-size:24px; }
     .fullscreen-nav.prev{left:15px}
     .fullscreen-nav.next{right:15px}
-    .fullscreen-counter{ font-size:14px; padding:10px 20px; bottom:20px; }
+    /* Override fullscreen counter positioning on small screens.  Keep
+       the counter at the top centre and remove additional padding.
+       Use !important to ensure these values take precedence over
+       earlier definitions. */
+    .fullscreen-counter{
+      top:20px !important;
+      bottom:auto !important;
+      padding:0 !important;
+      font-size:14px !important;
+    }
 
     .spec-input{ max-width:200px; }
+  }
+
+  /* Show navigation buttons in fullscreen mode on larger screens (e.g. desktop).
+     These buttons replicate the non-fullscreen slider arrows and only appear
+     when the viewport width is at least 768px. */
+  @media(min-width:768px){
+    .fullscreen-nav{
+      display:flex;
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      background:rgba(255,255,255,0.9);
+      border:none;
+      width:50px;
+      height:50px;
+      border-radius:50%;
+      cursor:pointer;
+      font-size:24px;
+      align-items:center;
+      justify-content:center;
+      transition:all 0.3s ease;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+      z-index:2001;
+    }
+    .fullscreen-nav:hover{
+      background:rgba(255,255,255,1);
+      transform:translateY(-50%) scale(1.1);
+    }
+    .fullscreen-nav:active{
+      transform:translateY(-50%) scale(0.95);
+    }
+    .fullscreen-nav.prev{ left:15px; }
+    .fullscreen-nav.next{ right:15px; }
+    [data-theme="dark"] .fullscreen-nav{
+      background:rgba(255,255,255,0.15);
+      color:#fff;
+    }
+    [data-theme="dark"] .fullscreen-nav:hover{
+      background:rgba(255,255,255,0.25);
+    }
   }
 
   /* Remove number input spinners (year, mileage, price) */
@@ -1438,7 +1540,7 @@
   <span class="fullscreen-close" id="fullscreenClose">×</span>
   <button class="fullscreen-nav prev" id="fullscreenPrev">‹</button>
   <button class="fullscreen-nav next" id="fullscreenNext">›</button>
-  <div class="fullscreen-counter" id="fullscreenCounter">1 / 1</div>
+  <div class="fullscreen-counter" id="fullscreenCounter">1 of 1</div>
   <img id="fullscreenImg" class="fullscreen-img" src="" alt="Fullscreen view">
 </div>
 
@@ -2137,6 +2239,12 @@
     currentIndex: 0,
     pending: [],
     isWired: false,
+    swipeGhost: null,
+    swipeFlag: false,
+
+    // Ghost image used for the fullscreen swipe animation.  It will be
+    // created lazily when the user first initiates a fullscreen drag.
+    fullscreenSwipeGhost: null,
 
     init(images){
       this.images = (images || []).filter(Boolean);
@@ -2220,6 +2328,8 @@
       };
 
       mainImg.onclick = () => {
+        // If we just swiped, don't treat it like a tap-to-fullscreen.
+        if (this.swipeFlag){ this.swipeFlag = false; return; }
         const idOrUrl = this.images[this.currentIndex];
         if (canSeeAdminNow()){
           openAdminPhotoModal(idOrUrl);
@@ -2228,14 +2338,505 @@
         this.openFullscreen();
       };
 
+      // Wire swipe/fullscreen once
+      if (!this.isWired){
+        this.ensureSwipeGhost();
+        this.wireSwipe();
+        this.wireFullscreen();
+        this.isWired = true;
+      } else {
+        this.ensureSwipeGhost();
+      }
+
       this.updateCoverBadges();
       this.injectAdminThumbTiles();
       this.renderPendingThumbs();
 
-      if (!this.isWired){
-        this.wireFullscreen();
-        this.isWired = true;
+      // (wired above)
+    },
+
+    ensureSwipeGhost(){
+      if (this.swipeGhost && document.body.contains(this.swipeGhost)) return;
+      const mainImg = $("mainImg");
+      if (!mainImg) return;
+      const host = mainImg.parentElement;
+      if (!host) return;
+
+      // Insert a ghost image under the main image. During drag we translate both,
+      // so you can see the next/prev image sliding in (like Marketplace).
+      let ghost = document.getElementById("swipeGhost");
+      if (!ghost){
+        ghost = document.createElement("img");
+        ghost.id = "swipeGhost";
+        ghost.className = "main-img swipe-ghost";
+        ghost.alt = "";
+        host.insertBefore(ghost, mainImg);
       }
+      ghost.style.opacity = "0";
+      ghost.style.transform = "translateX(0px)";
+      this.swipeGhost = ghost;
+    },
+
+    wireSwipe(){
+      const mainImg = $("mainImg");
+      const ghost = () => this.swipeGhost;
+      if (!mainImg) return;
+
+      let dragging = false;
+      let startX = 0;
+      let lastX = 0;
+      let activePointerId = null;
+
+      const resolveDisplay = (idOrUrl) => isFullUrl(idOrUrl) ? idOrUrl : cloudinaryFullUrl(idOrUrl);
+
+      const setGhostForDir = (dir) => {
+        const g = ghost();
+        if (!g) return;
+        if (!this.images.length) return;
+        let idx = this.currentIndex + dir;
+        if (idx < 0) idx = this.images.length - 1;
+        if (idx >= this.images.length) idx = 0;
+
+        g.src = resolveDisplay(this.images[idx]);
+        g.style.opacity = "1";
+        // Use the width of the container rather than the image itself.  When
+        // images have different aspect ratios their rendered widths can
+        // change between slides.  Using the parent container width
+        // produces a consistent slide distance and eliminates the jumpy
+        // resizing effect.
+        const w = (mainImg.parentElement?.getBoundingClientRect().width || mainImg.getBoundingClientRect().width || 1);
+        // place it just off-screen in the direction we're swiping from
+        g.style.transform = `translateX(${dir > 0 ? w : -w}px)`;
+      };
+
+      const clearTransforms = () => {
+        const g = ghost();
+        mainImg.classList.remove("swipe-anim");
+        g?.classList.remove("swipe-anim");
+        mainImg.style.transform = "translateX(0px)";
+        if (g){
+          g.style.transform = "translateX(0px)";
+          g.style.opacity = "0";
+        }
+      };
+
+      const animateTo = (mainX, ghostX, done) => {
+        const g = ghost();
+        mainImg.classList.add("swipe-anim");
+        g?.classList.add("swipe-anim");
+
+        const onEnd = (e) => {
+          if (e.target !== mainImg) return;
+          mainImg.removeEventListener("transitionend", onEnd);
+          mainImg.classList.remove("swipe-anim");
+          g?.classList.remove("swipe-anim");
+          if (typeof done === "function") done();
+        };
+        mainImg.addEventListener("transitionend", onEnd);
+
+        mainImg.style.transform = `translateX(${mainX}px)`;
+        if (g) g.style.transform = `translateX(${ghostX}px)`;
+      };
+
+      const onDown = (e) => {
+        if (!this.images || this.images.length <= 1) return;
+        // Only left-click for mouse
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        dragging = true;
+        activePointerId = e.pointerId;
+        startX = e.clientX;
+        lastX = e.clientX;
+        mainImg.setPointerCapture?.(activePointerId);
+      };
+
+      const onMove = (e) => {
+        if (!dragging) return;
+        if (activePointerId !== null && e.pointerId !== activePointerId) return;
+
+        const dx = e.clientX - startX;
+        lastX = e.clientX;
+
+        // Small jitter? ignore.
+        if (Math.abs(dx) < 3) return;
+
+        // Determine direction once and prep ghost image.
+        const dir = dx < 0 ? 1 : -1; // swipe left -> next (dir=+1)
+        setGhostForDir(dir);
+
+        const w = (mainImg.parentElement?.getBoundingClientRect().width || mainImg.getBoundingClientRect().width || 1);
+        const g = ghost();
+
+        // Move main with finger, pull ghost in from side.
+        mainImg.style.transform = `translateX(${dx}px)`;
+        if (g){
+          const base = dir > 0 ? w : -w;
+          g.style.transform = `translateX(${base + dx}px)`;
+        }
+
+        // If you moved enough, treat as swipe (prevents click-to-open)
+        this.swipeFlag = true;
+      };
+
+      const onUp = () => {
+        if (!dragging) return;
+        dragging = false;
+        const dx = lastX - startX;
+        const w = (mainImg.parentElement?.getBoundingClientRect().width || mainImg.getBoundingClientRect().width || 1);
+        const threshold = Math.min(120, w * 0.22);
+
+        if (Math.abs(dx) >= threshold){
+          const dir = dx < 0 ? 1 : -1;
+          // Finish slide
+          animateTo(dir > 0 ? -w : w, 0, () => {
+            // Commit index change, reset transforms, and swap main image
+            let next = this.currentIndex + dir;
+            if (next < 0) next = this.images.length - 1;
+            if (next >= this.images.length) next = 0;
+            this.currentIndex = next;
+            mainImg.style.transform = "translateX(0px)";
+            mainImg.src = resolveDisplay(this.images[this.currentIndex]);
+            const g = ghost();
+            if (g){ g.style.opacity = "0"; g.style.transform = "translateX(0px)"; }
+            this.updateActiveThumbs();
+            this.preloadNeighbors();
+          });
+        } else {
+          // Snap back
+          animateTo(0, (dx < 0 ? w : -w), () => {
+            clearTransforms();
+          });
+        }
+
+        // release pointer capture
+        try{ if (activePointerId !== null) mainImg.releasePointerCapture?.(activePointerId); }catch(e){}
+        activePointerId = null;
+      };
+
+      mainImg.addEventListener("pointerdown", onDown);
+      mainImg.addEventListener("pointermove", onMove);
+      mainImg.addEventListener("pointerup", onUp);
+      mainImg.addEventListener("pointercancel", onUp);
+      mainImg.addEventListener("lostpointercapture", onUp);
+    },
+
+    /**
+     * Attach swipe gestures to the fullscreen overlay.  This reuses
+     * much of the logic from wireSwipe() but operates on the
+     * fullscreen image and its overlay container.  Pointer events are
+     * used to support both mouse and touch; dragging left or right
+     * slides the current image away and brings in the next/previous
+     * image with an animation.  If the drag is too small, the image
+     * snaps back.  A ghost image is inserted behind the fullscreen
+     * image during the drag so you can see the next photo sliding in.
+     */
+    wireFullscreenSwipe(){
+      const fullImg = $("fullscreenImg");
+      const overlay = $("fullscreenOverlay");
+      if (!fullImg || !overlay) return;
+
+      // Ensure ghost element exists inside overlay
+      const ensureGhost = () => {
+        if (this.fullscreenSwipeGhost && document.body.contains(this.fullscreenSwipeGhost)) return;
+        const ghostId = "fullscreenSwipeGhost";
+        let ghost = document.getElementById(ghostId);
+        if (!ghost){
+          ghost = document.createElement("img");
+          ghost.id = ghostId;
+          // Only assign the swipe-ghost class.  The fullscreen-img class
+          // constrains the size (max-width/max-height) which we override
+          // manually.  Leaving it off avoids conflicting styles.
+          ghost.className = "swipe-ghost";
+          ghost.alt = "";
+          ghost.style.position = "absolute";
+          ghost.style.top = "0";
+          ghost.style.left = "0";
+          ghost.style.width = "100%";
+          ghost.style.height = "100%";
+          ghost.style.objectFit = "contain";
+          // Insert behind the fullscreen image
+          overlay.insertBefore(ghost, fullImg);
+        }
+        ghost.style.opacity = "0";
+        ghost.style.transform = "translateX(0px)";
+        this.fullscreenSwipeGhost = ghost;
+      };
+
+      ensureGhost();
+
+      // Drag state for single-finger swipes
+      let dragging = false;
+      let startX = 0;
+      let lastX = 0;
+      let activePointerId = null;
+      let translateX = 0;
+      // Map of active pointers for pinch-zoom.  Keys are pointerId and
+      // values are {x,y}.  When two pointers are present, we interpret
+      // the movement as a pinch and scale the image accordingly.
+      const pointers = new Map();
+      let pinchActive = false;
+      let pinchStartDist = 0;
+      let pinchStartScale = 1;
+      let currentScale = 1;
+
+      const resolveDisplay = (idOrUrl) => isFullUrl(idOrUrl) ? idOrUrl : cloudinaryFullUrl(idOrUrl);
+      const ghost = () => this.fullscreenSwipeGhost;
+
+      const setGhostForDir = (dir) => {
+        const g = ghost();
+        if (!g) return;
+        if (!this.images.length) return;
+        let idx = this.currentIndex + dir;
+        if (idx < 0) idx = this.images.length - 1;
+        if (idx >= this.images.length) idx = 0;
+        g.src = resolveDisplay(this.images[idx]);
+        g.style.opacity = "1";
+        const w = overlay.getBoundingClientRect().width || 1;
+        g.style.transform = `translateX(${dir > 0 ? w : -w}px)`;
+      };
+
+      const clearTransforms = () => {
+        const g = ghost();
+        fullImg.classList.remove("swipe-anim");
+        g?.classList.remove("swipe-anim");
+        translateX = 0;
+        currentScale = 1;
+        fullImg.style.transform = "translateX(0px) scale(1)";
+        if (g){
+          g.style.transform = "translateX(0px)";
+          g.style.opacity = "0";
+        }
+      };
+
+      const animateTo = (mainX, ghostX, done) => {
+        const g = ghost();
+        fullImg.classList.add("swipe-anim");
+        g?.classList.add("swipe-anim");
+        const onEnd = (e) => {
+          if (e.target !== fullImg) return;
+          fullImg.removeEventListener("transitionend", onEnd);
+          fullImg.classList.remove("swipe-anim");
+          g?.classList.remove("swipe-anim");
+          if (typeof done === "function") done();
+        };
+        fullImg.addEventListener("transitionend", onEnd);
+        // When animating, preserve the current scale factor while
+        // translating horizontally.  Ghost stays unscaled.
+        translateX = mainX;
+        fullImg.style.transform = `translateX(${mainX}px) scale(${currentScale})`;
+        if (g) g.style.transform = `translateX(${ghostX}px)`;
+      };
+
+      const getDistance = (p1, p2) => {
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        return Math.hypot(dx, dy);
+      };
+
+      const applyTransform = () => {
+        // Apply both translation and scaling to the fullscreen image.
+        fullImg.style.transform = `translateX(${translateX}px) scale(${currentScale})`;
+      };
+
+      const onDown = (e) => {
+        // Track all pointers for pinch detection
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        // If two pointers are down, start pinch mode
+        if (pointers.size === 2){
+          pinchActive = true;
+          // compute initial distance between two pointers
+          const [p1, p2] = Array.from(pointers.values());
+          pinchStartDist = getDistance(p1, p2);
+          pinchStartScale = currentScale;
+          // cancel any ongoing drag
+          dragging = false;
+          activePointerId = null;
+          return;
+        }
+        // Only consider single-pointer drags when pinch is not active
+        if (pointers.size === 1 && !pinchActive){
+          if (!this.images || this.images.length <= 1) return;
+          if (e.pointerType === "mouse" && e.button !== 0) return;
+          dragging = true;
+          activePointerId = e.pointerId;
+          startX = e.clientX;
+          lastX = e.clientX;
+          overlay.setPointerCapture?.(activePointerId);
+        }
+      };
+
+      const onMove = (e) => {
+        // Update tracked pointer positions
+        if (pointers.has(e.pointerId)){
+          pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        }
+        // Handle pinch scaling when two pointers are present
+        if (pinchActive && pointers.size >= 2){
+          const [p1, p2] = Array.from(pointers.values());
+          const dist = getDistance(p1, p2);
+          if (pinchStartDist > 0){
+            let scaleFactor = dist / pinchStartDist;
+            // Clamp scaling between 1x and 4x
+            currentScale = Math.min(Math.max(pinchStartScale * scaleFactor, 1), 4);
+            applyTransform();
+          }
+          return;
+        }
+        // If not pinching, handle drag for single-pointer swipes
+        if (!dragging) return;
+        if (activePointerId !== null && e.pointerId !== activePointerId) return;
+        const dx = e.clientX - startX;
+        lastX = e.clientX;
+        if (Math.abs(dx) < 3) return;
+        const dir = dx < 0 ? 1 : -1;
+        setGhostForDir(dir);
+        const w = overlay.getBoundingClientRect().width || 1;
+        const g = ghost();
+        translateX = dx;
+        applyTransform();
+        if (g){
+          const base = dir > 0 ? w : -w;
+          g.style.transform = `translateX(${base + dx}px)`;
+        }
+        // mark that we swiped; prevents click-to-close from firing
+        this.swipeFlag = true;
+      };
+
+      const onUp = (e) => {
+        // Remove pointer from tracking map
+        if (pointers.has(e.pointerId)) pointers.delete(e.pointerId);
+        // If we were pinching, end pinch mode when fewer than two pointers remain
+        if (pinchActive){
+          if (pointers.size < 2){
+            pinchActive = false;
+            // Snap back to minimum scale if user pinched down
+            if (currentScale <= 1){
+              currentScale = 1;
+              applyTransform();
+            }
+          }
+          return;
+        }
+        if (!dragging) return;
+        dragging = false;
+        const dx = lastX - startX;
+        const w = overlay.getBoundingClientRect().width || 1;
+        // Use an even smaller threshold so the user doesn't need to drag as far
+        // to change slides.  The distance is either 10% of the viewport
+        // width or at most 80px.
+        const threshold = Math.min(80, w * 0.10);
+        // If the pointer was cancelled or lost, treat this as a cancellation
+        // and snap the image back instead of sliding to the next/prev.
+        const cancelled = e && e.type && e.type !== 'pointerup';
+        if (!cancelled && Math.abs(dx) >= threshold){
+          const dir = dx < 0 ? 1 : -1;
+          animateTo(dir > 0 ? -w : w, 0, () => {
+            let next = this.currentIndex + dir;
+            if (next < 0) next = this.images.length - 1;
+            if (next >= this.images.length) next = 0;
+            this.currentIndex = next;
+            translateX = 0;
+            fullImg.style.transform = `translateX(0px) scale(${currentScale})`;
+            fullImg.src = resolveDisplay(this.images[this.currentIndex]);
+            // Update the slide counter text after changing images
+            const counterEl = $("fullscreenCounter");
+            if (counterEl) counterEl.textContent = `${this.currentIndex + 1} of ${this.images.length}`;
+            const g = ghost();
+            if (g){ g.style.opacity = "0"; g.style.transform = "translateX(0px)"; }
+            this.updateActiveThumbs?.();
+            this.preloadNeighbors?.();
+          });
+        } else {
+          animateTo(0, (dx < 0 ? w : -w), () => {
+            clearTransforms();
+          });
+        }
+        try{ if (activePointerId !== null) overlay.releasePointerCapture?.(activePointerId); }catch(err){}
+        activePointerId = null;
+      };
+
+      overlay.addEventListener("pointerdown", onDown);
+      overlay.addEventListener("pointermove", onMove);
+      overlay.addEventListener("pointerup", onUp);
+      // When the pointer is cancelled (e.g. due to the device generating a
+      // scroll or context menu), treat it as a cancelled gesture.  Passing
+      // the event to onUp() ensures the drag snaps back without
+      // transitioning slides.
+      overlay.addEventListener("pointercancel", onUp);
+      overlay.addEventListener("lostpointercapture", onUp);
+
+      // Also support pinch zoom on touch devices using touch events.  Some
+      // browsers may not fully support pointer events for multi-touch
+      // gestures; these handlers ensure zoom works reliably.  They
+      // operate on the same `currentScale` and `pinchActive` state as
+      // pointer-based handling above.
+      const getTouchDistance = (t1, t2) => {
+        const dx = t2.clientX - t1.clientX;
+        const dy = t2.clientY - t1.clientY;
+        return Math.hypot(dx, dy);
+      };
+      fullImg.addEventListener('touchstart', (ev) => {
+        if (ev.touches.length === 2){
+          pinchActive = true;
+          pinchStartDist = getTouchDistance(ev.touches[0], ev.touches[1]);
+          pinchStartScale = currentScale;
+        }
+      }, { passive: false });
+      fullImg.addEventListener('touchmove', (ev) => {
+        if (pinchActive && ev.touches.length === 2){
+          const dist = getTouchDistance(ev.touches[0], ev.touches[1]);
+          if (pinchStartDist > 0){
+            let scaleFactor = dist / pinchStartDist;
+            currentScale = Math.min(Math.max(pinchStartScale * scaleFactor, 1), 4);
+            applyTransform();
+          }
+          ev.preventDefault();
+        }
+      }, { passive: false });
+      fullImg.addEventListener('touchend', (ev) => {
+        if (ev.touches.length < 2){
+          pinchActive = false;
+          if (currentScale <= 1){
+            currentScale = 1;
+            applyTransform();
+          }
+        }
+      });
+    },
+
+    updateActiveThumbs(){
+      const thumbsContainer = $("thumbs");
+      const dotsContainer = $("sliderDots");
+      thumbsContainer?.querySelectorAll(".thumb").forEach(t => {
+        const idx = parseInt(t.dataset.idx, 10);
+        t.classList.toggle("active", idx === this.currentIndex);
+      });
+      dotsContainer?.querySelectorAll(".dot").forEach(d => {
+        const idx = parseInt(d.dataset.idx, 10);
+        d.classList.toggle("active", idx === this.currentIndex);
+      });
+    },
+
+    preloadNeighbors(){
+      // Preload closest neighbors (3 left + 3 right) so swipe feels instant.
+      if (!Array.isArray(this.images) || this.images.length <= 1) return;
+
+      const resolveDisplay = (idOrUrl) => isFullUrl(idOrUrl) ? idOrUrl : cloudinaryFullUrl(idOrUrl);
+      const total = this.images.length;
+
+      const toPreload = new Set();
+      for (let offset = 1; offset <= 3; offset++){
+        toPreload.add((this.currentIndex - offset + total) % total);
+        toPreload.add((this.currentIndex + offset) % total);
+      }
+
+      toPreload.forEach((idx) => {
+        const url = resolveDisplay(this.images[idx]);
+        if (!url) return;
+        const img = new Image();
+        img.decoding = "async";
+        img.loading = "eager";
+        img.src = url;
+      });
     },
 
     goTo(idx){
@@ -2243,8 +2844,8 @@
       const mainImg = $("mainImg");
       if (mainImg) mainImg.src = isFullUrl(this.images[idx]) ? this.images[idx] : cloudinaryFullUrl(this.images[idx]);
 
-      document.querySelectorAll("#thumbs .thumb").forEach((t, i) => t.classList.toggle("active", i === idx));
-      document.querySelectorAll("#sliderDots .dot").forEach((d, i) => d.classList.toggle("active", i === idx));
+      this.updateActiveThumbs();
+      this.preloadNeighbors();
     },
 
     openFullscreen(){
@@ -2253,8 +2854,16 @@
       const counter = $("fullscreenCounter");
       if (!overlay || !fullImg || !counter) return;
       fullImg.src = isFullUrl(this.images[this.currentIndex]) ? this.images[this.currentIndex] : cloudinaryFullUrl(this.images[this.currentIndex]);
-      counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+      // Use "of" instead of a slash for the slide count, matching the
+      // reference video's counter style.
+      counter.textContent = `${this.currentIndex + 1} of ${this.images.length}`;
       overlay.classList.add("active");
+      // Prevent the underlying page from scrolling or receiving touch
+      // events while the fullscreen viewer is open.  Without this,
+      // users can scroll the page behind the overlay or interact
+      // inadvertently with other elements.  Restored on close in
+      // wireFullscreen().
+      document.body.style.overflow = 'hidden';
     },
 
     wireFullscreen(){
@@ -2268,24 +2877,35 @@
       close?.addEventListener("click", (e) => {
         e.stopPropagation();
         overlay?.classList.remove("active");
+        // Restore scrolling when leaving fullscreen
+        document.body.style.overflow = '';
       });
 
       overlay?.addEventListener("click", (e) => {
         if (e.target === overlay) overlay.classList.remove("active");
+        // Restore scrolling when overlay closes
+        if (!overlay.classList.contains('active')) document.body.style.overflow = '';
       });
 
       prev?.addEventListener("click", (e) => {
         e.stopPropagation();
         window.changeSlide(-1);
         if (fullImg) fullImg.src = isFullUrl(this.images[this.currentIndex]) ? this.images[this.currentIndex] : cloudinaryFullUrl(this.images[this.currentIndex]);
-        if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+        if (counter) counter.textContent = `${this.currentIndex + 1} of ${this.images.length}`;
       });
+
+      // Prevent pointerdown events on the navigation buttons from propagating
+      // to the overlay.  Without this the overlay's pointer handlers may
+      // interpret the interaction as a swipe or click-to-close, causing
+      // fullscreen mode to exit unexpectedly when clicking the buttons.
+      prev?.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+      next?.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
 
       next?.addEventListener("click", (e) => {
         e.stopPropagation();
         window.changeSlide(1);
         if (fullImg) fullImg.src = isFullUrl(this.images[this.currentIndex]) ? this.images[this.currentIndex] : cloudinaryFullUrl(this.images[this.currentIndex]);
-        if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+        if (counter) counter.textContent = `${this.currentIndex + 1} of ${this.images.length}`;
       });
 
       document.addEventListener("keydown", (e) => {
@@ -2293,30 +2913,25 @@
         if (e.key === "ArrowLeft"){
           window.changeSlide(-1);
           if (fullImg) fullImg.src = isFullUrl(this.images[this.currentIndex]) ? this.images[this.currentIndex] : cloudinaryFullUrl(this.images[this.currentIndex]);
-          if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+          if (counter) counter.textContent = `${this.currentIndex + 1} of ${this.images.length}`;
         }
         if (e.key === "ArrowRight"){
           window.changeSlide(1);
           if (fullImg) fullImg.src = isFullUrl(this.images[this.currentIndex]) ? this.images[this.currentIndex] : cloudinaryFullUrl(this.images[this.currentIndex]);
-          if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
+          if (counter) counter.textContent = `${this.currentIndex + 1} of ${this.images.length}`;
         }
         if (e.key === "Escape"){
           overlay.classList.remove("active");
+          document.body.style.overflow = '';
         }
       });
 
-      let startX = 0, endX = 0;
-      overlay?.addEventListener("touchstart", (e) => { startX = e.changedTouches[0].screenX; });
-      overlay?.addEventListener("touchend", (e) => {
-        endX = e.changedTouches[0].screenX;
-        if (endX < startX - 50){
-          window.changeSlide(1);
-        } else if (endX > startX + 50){
-          window.changeSlide(-1);
-        }
-        if (fullImg) fullImg.src = isFullUrl(this.images[this.currentIndex]) ? this.images[this.currentIndex] : cloudinaryFullUrl(this.images[this.currentIndex]);
-        if (counter) counter.textContent = `${this.currentIndex + 1} / ${this.images.length}`;
-      });
+
+      // Enable pointer-based swipe in fullscreen overlay.  This will
+      // attach pointer event listeners to the overlay to handle drag
+      // gestures for sliding between images.  Without this call the
+      // fullscreen slider would not support swiping.
+      this.wireFullscreenSwipe();
     },
 
     updateCoverBadges(){

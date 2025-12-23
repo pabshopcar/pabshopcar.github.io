@@ -9,6 +9,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Resource hints for external dependencies -->
+  <link rel="dns-prefetch" href="https://res.cloudinary.com">
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <meta name="google-site-verification" content="evnpLoU4TEYreEXpPrIDMKN0ASQL9bB6PMvvnywPwNU" />
@@ -262,8 +267,6 @@
       height:100%;
       object-fit:cover;
       transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);
-      filter:grayscale(40%);
-      opacity:0.85;
       display:block;
     }
     .card:hover img{transform:scale(1.1)}
@@ -685,8 +688,9 @@
 </section>
 
 <section class="container">
-  <div id="gridStatus" class="grid-status"></div>
+  <!-- Place the grid first so status messages appear below the car list -->
   <div class="grid" id="grid"></div>
+  <div id="gridStatus" class="grid-status"></div>
 </section>
 
 <section id="contact" class="container">
@@ -992,7 +996,8 @@
 
   function cloudinaryCardUrl(publicId){
     const pid = cloudinaryEncodeId(publicId);
-    return `https://res.cloudinary.com/${CLOUDINARY.cloudName}/image/upload/f_auto,q_auto,w_900,c_fill/${pid}`;
+    // Use a fixed width of 700px for card thumbnails. Do not lower this to 400px as per instructions.
+    return `https://res.cloudinary.com/${CLOUDINARY.cloudName}/image/upload/f_auto,q_auto,w_700,c_fill/${pid}`;
   }
 
   function cloudinaryFullUrl(publicId){
@@ -1091,7 +1096,10 @@
    * GRID + infinite paging
    **********************/
   const GRID_STATE = {
-    pageSize: 10,
+    // Number of cars to load on subsequent scroll fetches
+    pageSize: 4,
+    // Number of cars to load for the very first page
+    initialPageSize: 8,
     offset: 0,
     loading: false,
     done: false,
@@ -1126,7 +1134,7 @@
         <span class="sold-badge">SOLD</span>
         ${cover ? `
           <img
-            src="${escapeHtml(primary)}"
+            data-src="${escapeHtml(primary)}"
             data-fallback="${escapeHtml(fallback)}"
             alt="${escapeHtml(title)}"
             loading="lazy"
@@ -1209,6 +1217,31 @@
     return card;
   }
 
+  /**
+   * Lazily load images when they are about to enter the viewport.
+   * Images begin with their real source in a `data-src` attribute. As each
+   * observed image approaches the viewport, its `src` attribute is populated,
+   * causing the browser to download the asset. After assignment, the observer
+   * stops observing that image.
+   */
+  function initLazyImages(){
+    const imgs = document.querySelectorAll('img[data-src]');
+    if (!imgs.length) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const img = entry.target;
+        const src = img.getAttribute('data-src');
+        if (src){
+          img.src = src;
+          img.removeAttribute('data-src');
+          observer.unobserve(img);
+        }
+      });
+    }, { rootMargin: '100px 0px' });
+    imgs.forEach(img => observer.observe(img));
+  }
+
   function renderCars(cars){
     const grid = $("grid");
     if (!grid) return;
@@ -1241,6 +1274,8 @@
     }
 
     renderCars(filtered);
+    // After rendering, activate lazy image loading for any new cards
+    initLazyImages();
     rewireInfiniteObserver();
   }
 
@@ -1251,8 +1286,10 @@
     setGridStatus(GRID_STATE.allLoadedCars.length ? "Loading more…" : "Loading sold cars…", true);
 
     try{
+      // Determine how many records to request based on whether this is the first fetch
+      const batchSize = GRID_STATE.offset === 0 ? GRID_STATE.initialPageSize : GRID_STATE.pageSize;
       const from = GRID_STATE.offset;
-      const to = GRID_STATE.offset + GRID_STATE.pageSize - 1;
+      const to = GRID_STATE.offset + batchSize - 1;
 
       let res = await db
         .from("cars")
@@ -1304,7 +1341,13 @@
     const cards = Array.from(document.querySelectorAll("#grid .card"));
     if (!cards.length) return;
 
-    const idx = Math.max(0, cards.length - 5);
+    // Adjust how close to the end of the grid we trigger the next page load.
+    // On faster connections (4g/3g) we start loading when the last 5 cards are visible.
+    // On slower connections we load when the last 3 cards are visible to avoid over-fetching.
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const effectiveType = connection?.effectiveType || '4g';
+    const triggerDistance = (effectiveType === '4g' || effectiveType === '3g') ? 5 : 3;
+    const idx = Math.max(0, cards.length - triggerDistance);
     const target = cards[idx];
     if (!target) return;
 
