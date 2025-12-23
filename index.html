@@ -1050,7 +1050,10 @@
   function getViewMode(){ return localStorage.getItem("viewMode") || "admin"; }
   function setViewMode(mode){
     localStorage.setItem("viewMode", mode);
-    location.reload();
+    updateViewButtons();
+    applyAdminView();
+    // re-render grid so admin-only buttons appear/disappear correctly
+    try{ renderAll(); }catch(e){ console.warn('renderAll failed', e); }
   }
   function canSeeAdminNow(){
     return window.isAdmin && (getViewMode() !== "user");
@@ -1120,7 +1123,7 @@
     if (error){ console.error(error); return alert("Login failed."); }
 
     await refreshAuthUI();
-    location.reload();
+    try{ renderAll(); }catch(e){ /* ignore */ }
   }
 
   async function logoutOwner(){
@@ -1128,7 +1131,7 @@
     if (error) console.error(error);
 
     await refreshAuthUI();
-    location.reload();
+    try{ renderAll(); }catch(e){ /* ignore */ }
   }
 
   /**********************
