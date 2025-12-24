@@ -1410,7 +1410,7 @@
    * Cars grid (paged + infinite)
    **********************/
   const GRID_STATE = {
-    pageSize: 10,
+    pageSize: 9,
     offset: 0,
     loading: false,
     done: false,
@@ -1622,7 +1622,7 @@
     }, {
       root: null,
       threshold: 0.1,
-      rootMargin: "600px 0px"
+      rootMargin: "200px 0px"
     });
 
     GRID_STATE.observer.observe(target);

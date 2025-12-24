@@ -1097,9 +1097,9 @@
    **********************/
   const GRID_STATE = {
     // Number of cars to load on subsequent scroll fetches
-    pageSize: 4,
+    pageSize: 3,
     // Number of cars to load for the very first page
-    initialPageSize: 8,
+    initialPageSize: 9,
     offset: 0,
     loading: false,
     done: false,
@@ -1358,7 +1358,7 @@
     }, {
       root: null,
       threshold: 0.1,
-      rootMargin: "600px 0px"
+      rootMargin: "200px 0px"
     });
 
     GRID_STATE.observer.observe(target);
