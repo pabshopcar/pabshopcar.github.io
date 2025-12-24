@@ -1238,7 +1238,7 @@
           observer.unobserve(img);
         }
       });
-    }, { rootMargin: '100px 0px' });
+    }, { rootMargin: '200px 0px' });
     imgs.forEach(img => observer.observe(img));
   }
 
@@ -1358,7 +1358,7 @@
     }, {
       root: null,
       threshold: 0.1,
-      rootMargin: "200px 0px"
+      rootMargin: "600px 0px"
     });
 
     GRID_STATE.observer.observe(target);

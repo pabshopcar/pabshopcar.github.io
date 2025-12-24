@@ -989,6 +989,18 @@
     </svg>
   `);
 
+  const CARD_IMG_PLACEHOLDER = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+    <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='675'>
+      <defs>
+        <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+          <stop offset='0' stop-color='#0b6eff' stop-opacity='0.10'/>
+          <stop offset='1' stop-color='#000' stop-opacity='0.06'/>
+        </linearGradient>
+      </defs>
+      <rect width='1200' height='675' fill='url(#g)'/>
+    </svg>
+  `);
+
   window.isAdmin = false;
   function $(id){ return document.getElementById(id); }
 
@@ -1406,7 +1418,43 @@
     return { primary, fallback };
   }
 
-  /**********************
+  
+  /**
+   * True lazy images:
+   * Cards render with a cheap placeholder. The real URL sits in `data-src`.
+   * When the image is close to the viewport, we swap `src` and the browser downloads it.
+   */
+  function initLazyImages(){
+    const imgs = document.querySelectorAll('img[data-src]');
+    if (!imgs.length) return;
+
+    // If IntersectionObserver isn't available, just load everything immediately.
+    if (!("IntersectionObserver" in window)){
+      imgs.forEach(img => {
+        const src = img.getAttribute("data-src");
+        if (src) img.src = src;
+        img.removeAttribute("data-src");
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const img = entry.target;
+        const src = img.getAttribute('data-src');
+        if (src){
+          img.src = src;
+          img.removeAttribute('data-src');
+          observer.unobserve(img);
+        }
+      });
+    }, { rootMargin: '120px 0px' });
+
+    imgs.forEach(img => observer.observe(img));
+  }
+
+/**********************
    * Cars grid (paged + infinite)
    **********************/
   const GRID_STATE = {
@@ -1436,15 +1484,28 @@
 
     card.innerHTML = `
       <div class="card-img-wrap">
-        <img
-          src="${escapeHtml(primary)}"
-          data-fallback="${escapeHtml(fallback)}"
-          alt="${escapeHtml(title)}"
-          loading="lazy"
-          decoding="async"
-          width="1200"
-          height="675"
-        >
+        
+        ${primary === DEFAULT_COVER ? `
+          <img
+            src="${escapeHtml(primary)}"
+            alt="${escapeHtml(title)}"
+            loading="lazy"
+            decoding="async"
+            width="1200"
+            height="675"
+          >
+        ` : `
+          <img
+            src="${escapeHtml(CARD_IMG_PLACEHOLDER)}"
+            data-src="${escapeHtml(primary)}"
+            data-fallback="${escapeHtml(fallback)}"
+            alt="${escapeHtml(title)}"
+            loading="lazy"
+            decoding="async"
+            width="1200"
+            height="675"
+          >
+        `}
       </div>
       <div class="card-body">
         <h3>${escapeHtml(title)}</h3>
@@ -1464,8 +1525,12 @@
     if (img){
       img.addEventListener("error", () => {
         const fb = img.getAttribute("data-fallback");
-        if (fb && img.src !== fb) img.src = fb;
-      }, { once:true });
+        if (fb && img.src !== fb){
+          img.src = fb;
+          // prevent loops
+          img.removeAttribute("data-fallback");
+        }
+      });
     }
 
     if (showAdminControls){
@@ -1541,6 +1606,9 @@
     const frag = document.createDocumentFragment();
     filtered.forEach(car => frag.appendChild(createCard(car)));
     grid.appendChild(frag);
+
+    // activate true-lazy image loading for newly rendered cards
+    initLazyImages();
 
     applyAdminView();
     rewireInfiniteObserver();
