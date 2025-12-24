@@ -747,7 +747,7 @@
   const root = document.documentElement;
 
   root.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
-  root.setAttribute('data-mobile-grid', localStorage.getItem('mobileGrid') || 'single');
+  root.setAttribute('data-mobile-grid', localStorage.getItem('mobileGrid') || 'double');
 
   function updateThemeButtons() {
     const currentTheme = root.getAttribute('data-theme');
