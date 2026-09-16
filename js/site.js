@@ -366,7 +366,7 @@
   }
   function setTheme(theme) {
     if (theme === root.dataset.theme) return;
-    try { localStorage.setItem("pab-theme", theme); } catch (e) {}
+    try { localStorage.setItem("pab-theme2", theme); } catch (e) {}
     transition("theme", () => {
       root.dataset.theme = theme;
       syncThemeControls();
@@ -379,7 +379,7 @@
     // Preview only: Fit (low crop) or Pop-out (the car's bottom continues below the photo box)
     const photos = e.target.closest("[data-set-photos]")?.dataset.setPhotos;
     if (photos && photos !== root.dataset.photos) {
-      try { localStorage.setItem("pab-photos", photos); } catch (err) {}
+      try { localStorage.setItem("pab-photos2", photos); } catch (err) {}
       transition("theme", () => {
         root.dataset.photos = photos;
         syncThemeControls();
