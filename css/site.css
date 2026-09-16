@@ -360,9 +360,10 @@ html:not(.keyboard) :focus-visible:not(input, select, textarea) { outline: none;
 .car-card.is-sold .car-photo img, .car-card.is-sold .car-pop { filter: saturate(0.35); }
 
 /* A card is a link, and a link can be dragged: pressing and moving started a native drag that
-   left the card pressed (reported 2026-09-15). Cards and their photos are not draggable. */
-.car-link { position: relative; -webkit-user-drag: none; }
-.car-link img { -webkit-user-drag: none; }
+   left the card pressed, and holding a gallery thumbnail froze the page the same way
+   (reported 2026-09-15). Nothing here is meant to be dragged. */
+.car-link { position: relative; }
+a, img, button { -webkit-user-drag: none; }
 
 /* Photo framing. These are tall 3:4 phone shots and a centred 16:10 crop cut the wheels off most of
    them, but not all. Fit (default) crops each photo where its own car sits: tools/photos.py measures

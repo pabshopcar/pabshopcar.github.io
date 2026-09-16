@@ -153,6 +153,11 @@
   // iOS Safari only shows :active press states when a touch listener exists.
   document.addEventListener("touchstart", () => {}, { passive: true });
 
+  // Nothing here is meant to be dragged. Without this, holding a card, a photo or a thumbnail and
+  // moving started the browser's own drag: the element stayed pressed and the taps after it were
+  // swallowed (reported 2026-09-15). CSS does not cover every browser, so the drag is refused here.
+  document.addEventListener("dragstart", (e) => e.preventDefault());
+
   // Focus rings are for keyboard users. On a phone, focus still moves (the viewer's close button
   // when it opens, back to the photo when it closes) and the browser draws the ring anyway.
   // The "keyboard" class turns rings on from the first key press until the next tap or click.
