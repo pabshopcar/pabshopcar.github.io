@@ -1,4 +1,4 @@
-/* PAB SHOP mockup. Two themes on one set of tokens:
+/* PAB SHOP. Two themes on one set of tokens:
    plate = New York plate navy on white with Empire gold price stickers
    black = true black with the same gold stickers
    Phone first: base styles are the phone layout, min-width queries add space. */
@@ -334,6 +334,23 @@ html:not(.keyboard) :focus-visible:not(input, select, textarea) { outline: none;
 }
 .photo-count .ic { width: 15px; height: 15px; }
 
+/* A deposit taken on Facebook: the car is still listed, but someone is ahead of you. */
+.pending-pill {
+  position: absolute; top: var(--space-2); left: var(--space-2);
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 999px;
+  background: var(--accent); color: var(--on-accent);
+  font-size: 0.8125rem; font-weight: 700;
+}
+.pending-pill .ic { width: 15px; height: 15px; }
+.pending-note {
+  display: flex; align-items: flex-start; gap: var(--space-2);
+  margin: var(--space-3) 0 0; padding: var(--space-3);
+  border-radius: var(--radius-m); background: var(--surface);
+  color: var(--text); font-weight: 600; line-height: 1.35;
+}
+.pending-note .ic { width: 20px; height: 20px; flex: none; margin-top: 1px; color: var(--accent); }
+
 .price-tag {
   display: inline-block; position: relative;
   margin: -22px 0 var(--space-2) var(--space-3);
@@ -371,7 +388,7 @@ a, img, button { -webkit-user-drag: none; }
    Pop-out draws the cut-off bottom of the car below the photo box from a cut-out strip, and only
    the photos that have such a strip are centred: a photo without one (not measured yet, and every
    gallery photo, which never gets a strip) keeps its own crop rather than being centred on
-   nothing. Footer switch: Photos Fit / Pop-out. */
+   nothing. Pop-out is off unless the address says ?photos=pop (js/theme.js). */
 :root { --photo-y: 72%; }
 .car-photo img, .gallery .slide img { object-position: 50% var(--photo-y); }
 :root[data-photos="pop"] .has-pop .car-photo img { object-position: 50% 50%; }
@@ -437,21 +454,10 @@ a, img, button { -webkit-user-drag: none; }
   color: var(--ink); font-weight: 600; text-decoration: none;
 }
 .footer-contact .ic { width: 20px; height: 20px; color: var(--muted); }
-.footer-mock p { margin: 0 0 var(--space-2); color: var(--muted); font-size: 0.875rem; }
-.preview-switches { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-
-.theme-switch {
-  display: inline-flex; padding: 3px;
-  border: 1px solid var(--line-strong); border-radius: var(--radius-m); background: var(--raised);
-}
-.theme-switch button {
-  display: inline-flex; align-items: center; gap: 6px;
-  min-height: 40px; padding: 0 var(--space-4);
-  border: 0; border-radius: 7px; background: transparent;
-  color: var(--muted); font: inherit; font-weight: 600; cursor: pointer;
-}
-.theme-switch .ic { width: 18px; height: 18px; }
-.theme-switch button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.footer-note { display: grid; gap: var(--space-2); align-content: start; color: var(--muted); font-weight: 600; }
+.footer-note p { display: flex; align-items: center; gap: var(--space-3); margin: 0; min-height: 44px; }
+.footer-note .ic { width: 20px; height: 20px; }
+.footer-note .copyright { display: block; min-height: 0; font-weight: 500; font-size: 0.875rem; }
 
 /* ---------- Phone contact bar ---------- */
 .contact-bar {
@@ -634,7 +640,7 @@ a, img, button { -webkit-user-drag: none; }
    ========================================================================== */
 
 /* Color changes, and the spring back after a press (the press itself is below) */
-.btn, .sort-button, .theme-switch button, .icon-btn, .gal-btn, .viewer-close,
+.btn, .sort-button, .icon-btn, .gal-btn, .viewer-close,
 .thumbs button, .topnav a, .back, .strip-head a, .footer-contact a {
   touch-action: manipulation;
   transition:
@@ -750,7 +756,7 @@ a, img, button { -webkit-user-drag: none; }
 
 @media (prefers-reduced-motion: no-preference) {
   /* Press: sink (--dur-press, slower on phones); letting go uses the spring transition above. */
-  .btn:active, .sort-button:active, .theme-switch button:active, .icon-btn:active,
+  .btn:active, .sort-button:active, .icon-btn:active,
   .viewer-close:active, .thumbs button:active, .topnav a:active, .back:active,
   .strip-head a:active, .footer-contact a:active, .gal-btn:active {
     transform: scale(var(--press-scale));

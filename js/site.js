@@ -1,6 +1,6 @@
 // PAB SHOP redesign: renders the pages from the live cars table (Supabase, read only).
 (() => {
-  const { business: B, supabase: SB, fbListings: FB = {} } = window.PAB;
+  const { business: B, supabase: SB } = window.PAB;
   const PHOTOS = window.PAB_PHOTOS || {};   // per photo: [crop %, pop-out strip, car depth] (tools/photos.py)
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -32,17 +32,19 @@
   let shown = "";           // path + query of the view on screen
 
   /* ---------- cars from the live database ----------
-     The new Supabase project (js/data.js), not the one pabshop.com still reads, so only cars
-     imported from Facebook into the new project show here. Rows are read once per page
-     load and reused by in-site links. Photos are the importer's uploads: per photo a /full/ file
-     (longest side 1000px), a /card/ file (640px, framed the same) and a /thumb/ file (420px,
-     cropped to 3:2). Some older cars point at Cloudinary ids instead. */
+     The cars table of the PAB SHOP Supabase project (js/data.js), filled by the Facebook importer
+     extension. Rows are read once per page load and reused by in-site links. Photos are the
+     importer's uploads: per photo a /full/ file (longest side 1000px), a /card/ file (640px, framed
+     the same) and a /thumb/ file (420px, cropped 3:2). Older rows may point at Cloudinary ids. */
   // A list card shows one photo, a price, a name and two facts, so the list asks for those columns
   // only. Dragging every description and every photo URL of every car along made the request 207 KB
   // with 63 cars, against about 25 KB this way, and none of it is cached (the database answers are
   // marked dynamic, unlike the photos, which are cached for a year). The car page then fetches its
   // own row in full — one small request, once per car opened.
-  const LIST_COLUMNS = "id,title,price,mileage,year,make,model,drivetrain,status,pending,cover_image,photo_count,listed_at,created_at";
+  const LIST_COLUMNS = "id,title,price,mileage,year,make,model,drivetrain,transmission,status,pending,cover_image,photo_count,listed_at,created_at";
+  // Newest first by the day the seller posted the car on Facebook (listed_at); created_at is only
+  // when it was copied to the site, which for a bulk import is the same half hour for every car.
+  const ORDER = "order=listed_at.desc.nullslast,created_at.desc";
   const HEADERS = { apikey: SB.key, Authorization: `Bearer ${SB.key}` };
   const askFor = (query) => fetch(`${SB.url}/rest/v1/cars?${query}`, { headers: HEADERS })
     .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); });
@@ -50,7 +52,7 @@
   let cars = [];
   let carsRequest = null;
   function loadCars() {
-    carsRequest ??= askFor(`select=${LIST_COLUMNS}&order=created_at.desc`)
+    carsRequest ??= askFor(`select=${LIST_COLUMNS}&${ORDER}`)
       .then((rows) => { cars = rows.map(toCar); })
       .catch((err) => { carsRequest = null; throw err; });
     return carsRequest;
@@ -68,7 +70,13 @@
           const at = cars.findIndex((c) => c.id === full.id);
           if (at < 0) cars.push(full); else cars[at] = full;
         })
-        .catch((err) => { carRequests.delete(id); throw err; }));
+        .catch((err) => {
+          // An id that is not even a uuid (a mistyped link) is refused with 400: that is "no such
+          // car", not a database outage, so the page shows Car not found instead of Try again.
+          if (err.message === "HTTP 400") return;
+          carRequests.delete(id);
+          throw err;
+        }));
     }
     return carRequests.get(id);
   }
@@ -133,9 +141,14 @@
       exterior: text(r.exterior_color),
       interior: text(r.interior_color),
       vin: text(r.vin),
+      fuel: text(r.fuel),
+      owners: num(r.owners),
+      titleStatus: text(r.title_status),
       description: text(r.description),
       status: text(r.status),
-      listed: text(r.created_at),
+      pending: r.pending === true,
+      fbItemId: text(r.fb_item_id),
+      listed: text(r.listed_at || r.created_at),
       photos,
       // List rows carry only the cover and a count; a car page's own row carries every photo.
       photoCount: Number.isFinite(Number(r.photo_count)) ? Number(r.photo_count) : photos.length,
@@ -362,12 +375,12 @@
   /* ---------- theme ---------- */
   function syncThemeControls() {
     const theme = root.dataset.theme;
-    $$("[data-set-theme]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.setTheme === theme)));
     $$("[data-toggle-theme]").forEach((b) => {
       b.setAttribute("aria-label", theme === "black" ? "Switch to light theme" : "Switch to black theme");
       b.innerHTML = icon(theme === "black" ? "sun" : "moon");
     });
-    $$("[data-set-photos]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.setPhotos === root.dataset.photos)));
+    // the browser chrome (address bar on phones) follows the page
+    $('meta[name="theme-color"]')?.setAttribute("content", theme === "black" ? "#000000" : "#ffffff");
   }
   function setTheme(theme) {
     if (theme === root.dataset.theme) return;
@@ -378,18 +391,7 @@
     });
   }
   document.addEventListener("click", (e) => {
-    const set = e.target.closest("[data-set-theme]");
-    if (set) setTheme(set.dataset.setTheme);
     if (e.target.closest("[data-toggle-theme]")) setTheme(root.dataset.theme === "black" ? "plate" : "black");
-    // Preview only: Fit (low crop) or Pop-out (the car's bottom continues below the photo box)
-    const photos = e.target.closest("[data-set-photos]")?.dataset.setPhotos;
-    if (photos && photos !== root.dataset.photos) {
-      try { localStorage.setItem("pab-photos2", photos); } catch (err) {}
-      transition("theme", () => {
-        root.dataset.photos = photos;
-        syncThemeControls();
-      });
-    }
   });
 
   /* ---------- shared bits ---------- */
@@ -401,6 +403,7 @@
     $$("[data-phone-label]").forEach((el) => { el.textContent = B.phoneLabel; });
     $$("[data-phone2-label]").forEach((el) => { el.textContent = B.phone2Label; });
     $$("[data-email-label]").forEach((el) => { el.textContent = B.email; });
+    $$("[data-year]").forEach((el) => { el.textContent = new Date().getFullYear(); });
   }
 
   // "2016 Buick encore" -> "Encore": the model column when filled, else the word after year and make.
@@ -428,14 +431,19 @@
     const count = c.photoCount > 1
       ? `<span class="photo-count" aria-label="${c.photoCount} photos">${icon("images")}${c.photoCount}</span>`
       : "";
+    // A deposit taken on Facebook ("pending") is worth knowing before anyone calls.
+    const pending = !sold && c.pending ? `<span class="pending-pill">${icon("clock")}Sale pending</span>` : "";
+    // Second fact: the drive (AWD/FWD) when the owner typed one, otherwise the transmission,
+    // which Facebook always has. Manual cars are the ones people ask about.
     const facts = [
       c.mileage !== null && `${icon("gauge")}${shortMiles(c.mileage)}`,
-      c.drivetrain && `${icon("disc-3")}${esc(c.drivetrain)}`,
+      c.drivetrain ? `${icon("disc-3")}${esc(c.drivetrain)}`
+        : c.transmission && `${icon("cog")}${esc(shortTransmission(c.transmission))}`,
     ].filter(Boolean);
     return `
       <li class="car-card${sold ? " is-sold" : ""}${pop ? " has-pop" : ""}" style="--vt: card-${esc(c.id)}${pop ? `; --pop-h: ${Number(cover.depth) || 0}` : ""}">
         <a class="car-link" href="${carHref(c.id)}" draggable="false">
-          <div class="car-photo">${photoHtml}${count}</div>
+          <div class="car-photo">${photoHtml}${count}${pending}</div>
           ${pop ? `<img class="car-pop" src="${esc(pop)}" alt="" loading="lazy" decoding="async" draggable="false">` : ""}
           <p class="price-tag${sold ? " is-sold" : ""}">${priceText(c)}</p>
           <h3 class="car-title">${esc(c.name)}</h3>
@@ -685,6 +693,7 @@
     tag.textContent = priceText(c);
     tag.classList.toggle("is-sold", sold);
     $("#carName").textContent = name;
+    $("#pendingNote").hidden = sold || !c.pending;
 
     // Only what the listing has: a fact without a value is left out.
     const keyFacts = factRows([
@@ -703,8 +712,11 @@
       ["cog", "Engine", c.engine],
       // only when it says more than the Auto/Manual tile above ("6-speed automatic", not "Automatic")
       ["cog", "Transmission", /^(auto|automatic|manual)$/i.test(c.transmission) ? "" : c.transmission],
+      ["fuel", "Fuel", c.fuel],
       ["palette", "Color", c.exterior],
       ["armchair", "Interior", c.interior],
+      ["users", "Owners", c.owners],
+      ["file-check", "Title", c.titleStatus],
       ["hash", "VIN", c.vin],
       ["calendar", "Listed", c.listed && shortDate(c.listed)],
     ]);
@@ -715,10 +727,11 @@
       ? `Yo, got anything like the ${name}?`
       : `Yo, is the ${name} still available?`);
 
-    const fbId = FB[c.id];
+    // The same car on Facebook Marketplace, for cars still for sale: the importer stores the
+    // listing id. A sold car's listing is usually deleted, so no link there.
     const fbLink = $("#fbLink");
-    fbLink.hidden = !fbId;
-    if (fbId) fbLink.href = `https://www.facebook.com/marketplace/item/${encodeURIComponent(fbId)}/`;
+    fbLink.hidden = sold || !c.fbItemId;
+    if (c.fbItemId) fbLink.href = `https://www.facebook.com/marketplace/item/${encodeURIComponent(c.fbItemId)}/`;
 
     const more = cars.filter((x) => x.status === "available" && x.id !== c.id).slice(0, 3);
     renderCards($("#moreGrid"), more);
@@ -889,6 +902,7 @@
     if (page === "home") initHome();
     if (page === "sold") initSold();
     if (page === "car") initCar();
+    if (page === "missing") fillContacts("Yo, what cars do you have right now?");
     syncThemeControls();
   }
 
