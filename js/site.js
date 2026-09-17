@@ -53,7 +53,13 @@
   let carsRequest = null;
   function loadCars() {
     carsRequest ??= askFor(`select=${LIST_COLUMNS}&${ORDER}`)
-      .then((rows) => { cars = rows.map(toCar); })
+      .then((rows) => {
+        // A car page fetches its own full row at the same time; when that answer lands first it
+        // must not be replaced by the list's cover-only copy (a shared car link then showed one
+        // photo and "1/1" whenever the list request was the slower of the two).
+        const full = new Map(cars.filter((c) => c.full).map((c) => [c.id, c]));
+        cars = rows.map((r) => full.get(String(r.id)) || toCar(r));
+      })
       .catch((err) => { carsRequest = null; throw err; });
     return carsRequest;
   }
@@ -150,6 +156,7 @@
       fbItemId: text(r.fb_item_id),
       listed: text(r.listed_at || r.created_at),
       photos,
+      full: Array.isArray(r.images),   // a car's own row (every photo), not a list row (cover only)
       // List rows carry only the cover and a count; a car page's own row carries every photo.
       photoCount: Number.isFinite(Number(r.photo_count)) ? Number(r.photo_count) : photos.length,
     };
@@ -786,6 +793,16 @@
     const vtrack = $("#viewerSlides");
     const vcount = $("#viewerCount");
     vtrack.innerHTML = slidesHtml();
+    // The viewer fits each photo to the screen from its own shape (--ar in css/site.css), known
+    // once the photo has loaded; before that the gallery's copy of the same photo may know it.
+    const keepShape = (img) => {
+      if (!img?.naturalWidth) return;
+      img.style.setProperty("--ar", (img.naturalWidth / img.naturalHeight).toFixed(4));
+    };
+    $$("img", vtrack).forEach((img) => {
+      keepShape(img);
+      img.addEventListener("load", () => keepShape(img), { once: true });
+    });
     // Which photo the viewer is showing. Kept here because a closed dialog is display: none, and a
     // hidden scroller's position is reset to the start: reading it back after closing gave photo 1.
     let shownInViewer = 0;
@@ -798,7 +815,7 @@
     const ready = (img) => {
       if (!img) return null;
       img.loading = "eager";
-      return img.decode().catch(() => {});
+      return img.decode().catch(() => {}).then(() => keepShape(img));
     };
 
     // What travels on the gallery side is the whole frame, so the photo counter (and desktop arrows)
@@ -840,6 +857,9 @@
       }, () => {
         i = main.index;
         morph = canMorph();
+        // the gallery already shows this photo, so its shape is known before the viewer's copy loads
+        const shown = galleryImg(i);
+        if (shown?.naturalWidth && viewerImg(i)) viewerImg(i).style.setProperty("--ar", (shown.naturalWidth / shown.naturalHeight).toFixed(4));
         if (morph) {
           vtName(frame, "viewer-photo");
           alignPhoto(i);

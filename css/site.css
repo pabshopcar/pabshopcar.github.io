@@ -603,12 +603,16 @@ a, img, button { -webkit-user-drag: none; }
 }
 .viewer::backdrop { background: #000; }
 .viewer .slides { height: 100%; aspect-ratio: auto; border-radius: 0; background: #000; cursor: default; }
-/* The image box is exactly the visible photo (not a letterboxed full-screen box),
-   so it lines up with the gallery photo when one grows into the other. */
+/* The image box is exactly the visible photo (not a letterboxed full-screen box), so it lines up
+   with the gallery photo when one grows into the other. The fit is written out rather than left
+   to width/height auto: a srcset image's intrinsic size is its file width divided by its density,
+   which on a phone came out smaller than the screen (280px wide on a 390px screen), and auto never
+   scales up: the photo sat small with black all round (his report, 2026-09-16). --ar is the
+   photo's width/height, set by js/site.js once the photo's size is known. */
 .viewer .slide { position: relative; }
 .viewer .slide img {
   position: absolute; inset: 0; margin: auto;
-  width: auto; height: auto; max-width: 100%; max-height: 100%;
+  width: 100%; height: auto; max-width: calc(100dvh * var(--ar, 1.5)); aspect-ratio: var(--ar, 1.5);
 }
 .viewer-bar {
   position: absolute; inset: 0 0 auto 0; z-index: 1;
