@@ -40,13 +40,19 @@
   // only. Dragging every description and every photo URL of every car along made the request 207 KB
   // with 63 cars, against about 25 KB this way, and none of it is cached (the database answers are
   // marked dynamic, unlike the photos, which are cached for a year). The car page then fetches its
-  // own row in full — one small request, once per car opened.
-  const LIST_COLUMNS = "id,title,price,mileage,year,make,model,drivetrain,transmission,status,pending,cover_image,photo_count,listed_at,created_at";
+  // own row in full — one small request, once per car opened. The color is there for search ("white").
+  const LIST_COLUMNS = "id,title,price,mileage,year,make,model,drivetrain,transmission,exterior_color,status,pending,cover_image,photo_count,listed_at,created_at";
   // Newest first by the day the seller posted the car on Facebook (listed_at); created_at is only
   // when it was copied to the site, which for a bulk import is the same half hour for every car.
   const ORDER = "order=listed_at.desc.nullslast,created_at.desc";
+  // The key goes in the address, not in headers: a request with its own headers is preceded by a
+  // CORS preflight, one extra round trip before the answer, and the browser remembers a preflight
+  // per address, so every car page paid it again (a tap waited two round trips for the car's row).
+  // Supabase reads `apikey` from the query and treats the request as the anon role, same as the
+  // headers did. Should it ever refuse that (401), the request is repeated the old way.
   const HEADERS = { apikey: SB.key, Authorization: `Bearer ${SB.key}` };
-  const askFor = (query) => fetch(`${SB.url}/rest/v1/cars?${query}`, { headers: HEADERS })
+  const askFor = (query) => fetch(`${SB.url}/rest/v1/cars?${query}&apikey=${encodeURIComponent(SB.key)}`)
+    .then((r) => (r.status === 401 ? fetch(`${SB.url}/rest/v1/cars?${query}`, { headers: HEADERS }) : r))
     .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); });
 
   let cars = [];
@@ -122,6 +128,20 @@
 
   const text = (v) => String(v ?? "").trim();
   const num = (v) => (v === null || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
+
+  // The drive. Facebook has no drivetrain field, so the column is empty on every imported car,
+  // but the seller usually says it: "2015 Chevrolet Equinox AWD", "Car run and drive good, AwD".
+  // The owner's own value wins, then the title, then the description. 4WD is tested first because
+  // "AWD 4x4" and "4WD / AWD" both describe a Jeep's 4WD; "4D" (doors) and "test drive" match none.
+  const DRIVES = [
+    ["4WD", /\b(4wd|4x4|four[\s-]?wheel[\s-]?drive)\b/i],
+    ["AWD", /\b(awd|all[\s-]?wheel[\s-]?drive|xdrive|quattro|4matic|4motion)\b/i],
+    ["FWD", /\b(fwd|front[\s-]?wheel[\s-]?drive)\b/i],
+    ["RWD", /\b(rwd|rear[\s-]?wheel[\s-]?drive)\b/i],
+  ];
+  const driveIn = (s) => DRIVES.find(([, re]) => re.test(s))?.[0] || "";
+  const driveOf = (r) => text(r.drivetrain) || driveIn(text(r.title)) || driveIn(text(r.description));
+
   function toCar(r) {
     // the cover first, so the card's photo is the gallery's first photo
     const refs = [r.cover_image, ...(Array.isArray(r.images) ? r.images : [])]
@@ -142,7 +162,7 @@
       price: num(r.price),
       mileage: num(r.mileage),
       transmission: text(r.transmission),
-      drivetrain: text(r.drivetrain),
+      drivetrain: driveOf(r),
       engine: text(r.engine),
       exterior: text(r.exterior_color),
       interior: text(r.interior_color),
@@ -197,6 +217,77 @@
   const hurry = () => document.getAnimations().forEach((a) => {
     if (a.effect?.pseudoElement?.startsWith("::view-transition")) a.updatePlaybackRate(HURRY);
   });
+  // Things that travel follow a curve, not a straight line (his ask, 2026-11-19): the card photo
+  // and its price flying to the car page and back, and cards moving to new places in a sort. The
+  // browser moves each named layer (its group) along a straight line on one spring; on top of that
+  // the picture inside the group (its image pair) is pushed out sideways and back, peaking halfway,
+  // on the same spring and duration. That is a quadratic Bézier through the same two ends: the x and
+  // y parts of the move get different timing, and both still land together.
+  // Which side it bows to: a move with a real sideways part sags downward as if thrown (Material's
+  // arc rule: going up, the sideways part leads; going down, the drop leads), so a photo flying back
+  // retraces its way out. A move that is (almost) straight up or down, which on a phone is nearly
+  // every move because the list is one column, has no lower side: a page change bows to the right
+  // both ways (back retraces it), and in a sort cards going up bow right and cards going down bow
+  // left, so two cards trading places pass beside each other instead of through each other.
+  // How far: `bow` of the distance, at most `max` px, so a long move does not swing off screen.
+  const ARC = {
+    page: { duration: "--dur-photo", curve: "--spring-zoom", bow: 0.14, max: 48 },
+    list: { duration: "--dur-list", curve: "--spring-smooth", bow: 0.1, max: 48 },
+  };
+  const TRAVELLER = /^(car-photo|car-price|card-.+)$/;
+  const arcSheet = document.head.appendChild(document.createElement("style"));
+  function travellerCentres() {
+    const at = new Map();
+    $$('[style*="view-transition-name"], #carGrid > li').forEach((el) => {
+      const name = getComputedStyle(el).viewTransitionName;
+      if (!TRAVELLER.test(name)) return;
+      const r = el.getBoundingClientRect();
+      at.set(name, [r.left + r.width / 2, r.top + r.height / 2]);
+    });
+    return at;
+  }
+  // A CSS linear() curve (the spring tokens in css/site.css) as a function of time 0..1.
+  function curveOf(css) {
+    const stops = css.trim().replace(/^linear\(|\)$/g, "").split(",").map((s) => s.trim().split(/\s+/));
+    const pts = stops.map(([v, at], i) => [Number(v), at ? parseFloat(at) / 100 : i ? (i === stops.length - 1 ? 1 : NaN) : 0]);
+    pts.forEach((p, i) => {   // a stop without a position sits halfway between its neighbours
+      if (Number.isNaN(p[1])) p[1] = (pts[i - 1][1] + (pts.slice(i + 1).find((q) => !Number.isNaN(q[1]))?.[1] ?? 1)) / 2;
+    });
+    return (t) => {
+      let i = 1;
+      while (i < pts.length - 1 && pts[i][1] < t) i++;
+      const [[v0, t0], [v1, t1]] = [pts[i - 1], pts[i]];
+      return t1 > t0 ? v0 + ((v1 - v0) * (t - t0)) / (t1 - t0) : v1;
+    };
+  }
+  function bend(kind, from) {
+    const { duration, curve, bow, max } = ARC[kind];
+    const spring = curveOf(getComputedStyle(root).getPropertyValue(curve));
+    const rules = [];
+    travellerCentres().forEach(([x1, y1], name) => {
+      if (!from.has(name)) return;
+      const [x0, y0] = from.get(name);
+      const dx = x1 - x0;
+      const dy = y1 - y0;
+      const len = Math.hypot(dx, dy);
+      if (len < 24) return;
+      let [nx, ny] = [-dy / len, dx / len];   // a unit normal to the straight path
+      const sideways = Math.abs(dx) >= 0.3 * Math.abs(dy);
+      if (sideways ? ny < 0 : (nx > 0) !== (kind === "page" || dy < 0)) [nx, ny] = [-nx, -ny];
+      const size = Math.min(max, bow * len);
+      const id = CSS.escape(name);
+      const frames = [];
+      for (let i = 0; i <= 40; i++) {
+        const q = spring(i / 40);
+        const k = 4 * q * (1 - q) * size;
+        frames.push(`${i * 2.5}% { translate: ${(nx * k).toFixed(2)}px ${(ny * k).toFixed(2)}px; }`);
+      }
+      rules.push(`@keyframes arc-${id} { ${frames.join(" ")} }`,
+        `::view-transition-image-pair(${id}) { animation: arc-${id} var(${duration}) linear both; }`);
+    });
+    arcSheet.textContent = rules.join("\n");
+  }
+
   function transition(kind, update, before) {
     if (!document.startViewTransition) {
       update();
@@ -205,12 +296,19 @@
     const run = () => {
       before?.();
       root.classList.add(`vt-${kind}`);
-      const t = document.startViewTransition(update);
+      // where the travellers start; where they end is measured once the update has drawn the new state
+      const from = ARC[kind] && canMorph() ? travellerCentres() : null;
+      const t = document.startViewTransition(!from ? update : async () => {
+        await update();
+        try { bend(kind, from); } catch (err) {}   // a straight path is fine; a lost animation is not
+      });
       active = t;
       t.ready.catch(() => {});
       return t.finished.catch(() => {}).then(() => {
+        arcSheet.textContent = "";
         root.classList.remove(`vt-${kind}`);
         root.style.removeProperty("--vt-photo-shift");
+        root.style.removeProperty("--menu-origin");
         clearVtNames();
         active = null;
       });
@@ -244,7 +342,7 @@
   // again (coming back from a car) shows them at once.
   const seenPhotos = new Set();
   function fadeInImages(scope) {
-    $$(".car-photo img", scope).forEach((img) => {
+    $$(".car-photo img, .car-glow", scope).forEach((img) => {
       const src = img.getAttribute("src");
       if (img.complete || seenPhotos.has(src)) return;
       img.classList.add("is-loading");
@@ -287,19 +385,54 @@
     return url;
   }
 
-  // Start loading the next page as soon as a finger lands on the link.
-  document.addEventListener("pointerdown", (e) => {
-    const url = inSiteUrl(e.target.closest?.("a[href]"));
-    if (url) fetchPage(url.pathname).catch(() => {});
-  }, { capture: true, passive: true });
+  // Start loading the next page as soon as a finger lands on the link (or a mouse rests on it):
+  // its HTML and, for a car, the car's own row, which the page waits for. Fetching the row only
+  // on the click left a card tap looking dead for one whole round trip after the finger lifted
+  // (455ms with 400ms of latency, tools: tap-latency.mjs).
+  function prefetch(a) {
+    const url = inSiteUrl(a);
+    if (!url) return;
+    fetchPage(url.pathname).catch(() => {});
+    if (url.pathname.includes("car.html")) loadCar(url.searchParams.get("id")).catch(() => {});
+  }
+  document.addEventListener("pointerdown", (e) => prefetch(e.target.closest?.("a[href]")), { capture: true, passive: true });
+  let hovered = null;
+  let hoverTimer = 0;
+  document.addEventListener("pointerover", (e) => {
+    if (e.pointerType !== "mouse") return;
+    const a = e.target.closest?.("a[href]") || null;
+    if (a === hovered) return;
+    hovered = a;
+    clearTimeout(hoverTimer);
+    if (a) hoverTimer = setTimeout(() => prefetch(a), 65);   // a pointer only passing over does not count
+  }, { passive: true });
+
+  // While the next page loads, a tap must not look dead: the tapped link stays pressed instead of
+  // springing back, and after 100ms a gold line grows along the top of the screen, the way a
+  // browser shows a page loading (it shows nothing here: in-site links do not load documents).
+  let pendingLink = null;
+  let pendingTimer = 0;
+  function startPending(link) {
+    endPending();
+    pendingLink = link;
+    link?.classList.add("is-opening");
+    pendingTimer = setTimeout(() => root.classList.add("nav-pending"), 100);
+  }
+  function endPending() {
+    clearTimeout(pendingTimer);
+    root.classList.remove("nav-pending");
+    pendingLink?.classList.remove("is-opening");
+    pendingLink = null;
+  }
 
   document.addEventListener("click", (e) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    const url = inSiteUrl(e.target.closest("a[href]"));
+    const a = e.target.closest("a[href]");
+    const url = inSiteUrl(a);
     if (!url) return;
     e.preventDefault();
     lastNavTap = { at: performance.now(), x: e.clientX, y: e.clientY };
-    navigate(url, true);
+    navigate(url, true, a);
   });
 
   history.scrollRestoration = "manual";
@@ -309,8 +442,9 @@
   });
 
   let navToken = 0;
-  async function navigate(url, push) {
+  async function navigate(url, push, link = null) {
     const token = ++navToken;
+    startPending(link);
     let html;
     try {
       // A car page needs its own row (the photos) before the transition starts, like the HTML does.
@@ -337,6 +471,8 @@
     };
 
     transition("page", () => {
+      // the old picture (still pressed, line still running) has been taken; it fades with the old page
+      endPending();
       clearVtNames();
       cleanupView();
       if (push) {
@@ -419,6 +555,88 @@
     return model.charAt(0).toUpperCase() + model.slice(1);
   };
 
+  /* ---------- search ----------
+     People type what they remember, in any order and spelling: "escape ford", "2013 escape",
+     "chevy", "Equnox", "65k". Each word is matched on its own and every word must match. A word
+     matches the start of any word about the car (so results hold up while typing), a nickname
+     finds its make, and "65k" or "7.5k" find the mileage or price as the card shows them. A typo
+     is forgiven only when the word, spelled as typed, finds no car at all (so "trax" does not also
+     find the Traverse), only in names, never in numbers (2012 is not 2013): one wrong letter from 4
+     letters on, two from 8 — the limits Algolia uses. */
+  const NICKNAMES = {
+    chevrolet: ["chevy"], volkswagen: ["vw"], "mercedes-benz": ["mercedes", "benz", "merc"],
+    cadillac: ["caddy"], bmw: ["bimmer", "beemer"], subaru: ["subie"], mitsubishi: ["mitsu"],
+    jaguar: ["jag"], "land rover": ["landrover"], toyota: ["yota"], oldsmobile: ["olds"],
+  };
+  const SKIP_WORDS = new Set(["a", "an", "and", "the", "with", "for", "mi", "mile", "miles", "car", "cars"]);
+  // lower case, "65,300" -> "65300", "$7,500" -> "7500", split on anything but letters, digits and decimal points
+  const words = (s) => String(s ?? "").toLowerCase().replace(/(\d),(?=\d{3})/g, "$1").replace(/[’']/g, "")
+    .split(/[^a-z0-9.]+/).map((w) => w.replace(/^\.+|\.+$/g, "")).filter(Boolean);
+  const kilo = (n) => [`${Math.round(n / 1000)}k`, `${Math.floor(n / 1000)}k`, `${Math.round(n / 100) / 10}k`];
+
+  // Words about one car: [names (typos forgiven), other words (start of word only)].
+  function searchWords(c) {
+    const names = new Set();
+    const other = new Set();
+    const add = (set, value) => {
+      const w = words(value);
+      w.forEach((x) => set.add(x));
+      // "F-150" is also "f150", "CR-V" "crv", "Grand Vitara" "grandvitara"
+      w.slice(1).forEach((x, i) => set.add(w[i] + x));
+    };
+    [c.name, c.make, c.model, c.exterior].forEach((v) => add(names, v));
+    Object.entries(NICKNAMES).forEach(([make, nick]) => {
+      if (c.make.toLowerCase() === make || c.name.toLowerCase().includes(make)) nick.forEach((n) => names.add(n));
+    });
+    [c.drivetrain, c.transmission, shortTransmission(c.transmission), c.engine].forEach((v) => add(other, v));
+    if (/4wd/i.test(c.drivetrain)) other.add("4x4");
+    if (c.year) { other.add(String(c.year)); other.add(String(c.year).slice(2)); }
+    if (c.mileage !== null) { other.add(String(c.mileage)); kilo(c.mileage).forEach((k) => other.add(k)); }
+    if (c.price !== null) { other.add(String(Math.round(c.price))); kilo(c.price).forEach((k) => other.add(k)); }
+    return [[...names], [...names, ...other]];
+  }
+
+  // Edit distance with swapped neighbours counting as one edit; stops early past `max`.
+  function typos(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    let prev2 = null;
+    let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const row = [i];
+      let best = i;
+      for (let j = 1; j <= b.length; j++) {
+        let d = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        if (prev2 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d = Math.min(d, prev2[j - 2] + 1);
+        row.push(d);
+        best = Math.min(best, d);
+      }
+      if (best > max) return max + 1;
+      prev2 = prev;
+      prev = row;
+    }
+    return prev[b.length];
+  }
+  const startsWord = (q, list) => list.some((w) => w.startsWith(q));
+  function nearlyNames(q, names) {
+    if (q.length < 4 || /\d/.test(q)) return false;
+    const max = q.length >= 8 ? 2 : 1;
+    // the whole word, or the start of a longer one ("equno" while typing "equinox": a letter may be
+    // missing or extra, so the start is taken a little shorter and longer too)
+    return names.some((w) => typos(q, w, max) <= max
+      || [-1, 0, 1].some((d) => w.length > q.length + d && typos(q, w.slice(0, q.length + d), max) <= max));
+  }
+  // The cars (with their words, from searchWords) that match every word of the query. A round
+  // number ("65000", "65,000") also matches what the card says ("65k").
+  const asTyped = (q, list) => startsWord(q, list) || (/^\d+000$/.test(q) && list.includes(`${q.slice(0, -3)}k`));
+  function search(entries, query) {
+    const terms = words(query).filter((w) => !SKIP_WORDS.has(w));
+    if (!terms.length) return entries.map((e) => e.car);
+    const exact = new Set(terms.filter((q) => entries.some((e) => asTyped(q, e.all))));
+    return entries
+      .filter((e) => terms.every((q) => asTyped(q, e.all) || (!exact.has(q) && nearlyNames(q, e.names))))
+      .map((e) => e.car);
+  }
+
   const factRows = (list) => list
     .filter(([, , value]) => value !== null && value !== "")
     .map(([ic, label, value]) => `<div><dt>${icon(ic)}<span>${label}</span></dt><dd>${esc(value)}</dd></div>`)
@@ -434,6 +652,13 @@
                width="1000" height="667" style="--photo-y: ${cover.y}%"
                loading="${seenPhotos.has(cover.card) ? "eager" : "lazy"}" decoding="async" draggable="false" alt="${esc(c.name)}">`
       : icon("car", "ic no-photo");
+    // A car for sale lights the black page under it with its own photo, blurred (css: .car-glow).
+    // The same src, srcset and sizes as the photo, so the browser picks the same file: no second
+    // download. Sold cars stay unlit, like their greyed photos.
+    const glow = cover && !sold
+      ? `<img class="car-glow" src="${esc(cover.card)}" srcset="${esc(cover.card)} 640w, ${esc(cover.full)} 1000w" sizes="${sizes}"
+               style="--photo-y: ${cover.y}%" loading="${seenPhotos.has(cover.card) ? "eager" : "lazy"}" decoding="async" draggable="false" alt="" aria-hidden="true">`
+      : "";
     const pop = cover && cover.pop;
     const count = c.photoCount > 1
       ? `<span class="photo-count" aria-label="${c.photoCount} photos">${icon("images")}${c.photoCount}</span>`
@@ -450,7 +675,7 @@
     return `
       <li class="car-card${sold ? " is-sold" : ""}${pop ? " has-pop" : ""}" style="--vt: card-${esc(c.id)}${pop ? `; --pop-h: ${Number(cover.depth) || 0}` : ""}">
         <a class="car-link" href="${carHref(c.id)}" draggable="false">
-          <div class="car-photo">${photoHtml}${count}${pending}</div>
+          ${glow}<div class="car-photo">${photoHtml}${count}${pending}</div>
           ${pop ? `<img class="car-pop" src="${esc(pop)}" alt="" loading="lazy" decoding="async" draggable="false">` : ""}
           <p class="price-tag${sold ? " is-sold" : ""}">${priceText(c)}</p>
           <h3 class="car-title">${esc(c.name)}</h3>
@@ -518,12 +743,14 @@
       sortButton.querySelector("use").setAttribute("href", current.querySelector("use").getAttribute("href"));
     }
 
+    const entries = available.map((car) => {
+      const [names, all] = searchWords(car);
+      return { car, names, all };
+    });
+
     function render() {
-      const term = q.value.trim().toLowerCase();
-      const list = available
-        .filter((c) => !term || [c.name, c.make, c.model, c.year, c.drivetrain, c.transmission, c.engine, c.exterior]
-          .join(" ").toLowerCase().includes(term))
-        .sort(sorters[sort]);
+      const term = q.value.trim();
+      const list = search(entries, term).sort(sorters[sort]);
       grid.replaceChildren(...list.map((c) => nodes.get(c.id)));
       count.textContent = term ? `${list.length} of ${available.length}` : plural(available.length, "car");
       empty.hidden = list.length > 0;
@@ -563,13 +790,25 @@
       }
       if (e.key === "Tab") sortMenu.hidePopover();
     });
-    sortOptions.forEach((o) => o.addEventListener("click", () => {
+    // Closing the menu as part of a sort: it leaves the top layer at once, inside the transition's
+    // update, and its picture shrinks and fades on its own layer (css: view-transition-old(sort-menu)).
+    // Left to its own 150ms closing, the popover dropped out of the top layer while the cards were
+    // moving, and Chrome ended the whole transition right there: every sort chosen from the menu
+    // jumped to its end after 167ms instead of sliding for 750ms (measured 2026-11-19).
+    const closeMenuNow = () => {
+      if (document.startViewTransition) sortMenu.classList.add("instant");   // no view transitions: its own close
       sortMenu.hidePopover();
+    };
+    sortMenu.addEventListener("beforetoggle", (e) => { if (e.newState === "open") sortMenu.classList.remove("instant"); });
+    sortOptions.forEach((o) => o.addEventListener("click", () => {
       sortButton.focus({ preventScroll: true });
-      if (o.dataset.sort === sort) return;
+      if (o.dataset.sort === sort) { sortMenu.hidePopover(); return; }
       sort = o.dataset.sort;
       // the closing menu gets its own layer, so the cards sliding underneath don't cover it
-      transition("list", render, () => vtName(sortMenu, "sort-menu"));
+      transition("list", () => { closeMenuNow(); render(); }, () => {
+        vtName(sortMenu, "sort-menu");
+        root.style.setProperty("--menu-origin", sortMenu.classList.contains("above") ? "bottom right" : "top right");
+      });
     }));
     // A fixed menu would drift away from its button when the page scrolls, so scrolling closes it.
     const closeOnScroll = () => { if (menuOpen()) sortMenu.hidePopover(); };
@@ -874,6 +1113,7 @@
       transition("viewer-close", async () => {
         vtName(viewerImg(i));
         nameViewerControls(false);
+        resetDrag();   // after the old picture was taken, so a dragged photo flies home from where it was let go
         viewer.close();
         main.goTo(i, false);
         if (morph) {
@@ -896,13 +1136,81 @@
     track.addEventListener("pointerdown", (e) => { downX = e.clientX; moved = false; }, { passive: true });
     track.addEventListener("pointermove", (e) => { if (Math.abs(e.clientX - downX) > 8) moved = true; }, { passive: true });
     track.addEventListener("click", () => { if (!moved) openViewer(); });
+    // Swipe down to close, as in Photos: the photo follows the finger both ways and shrinks a little
+    // as it goes down, the black thins out to the car page underneath, and the controls fade. Let go
+    // past 96px down, or flick down, and the viewer closes from wherever the photo is (closeViewer
+    // flies it home from there); anything else springs it back. Sideways stays the photo strip's own
+    // swipe: the track allows only horizontal panning (css), so a vertical drag reaches this code.
+    let drag = null;
+    let draggedAt = -1e9;   // a drag that ends over the black must not also count as a tap there
+    const dragImg = () => viewerImg(shownInViewer);
+    function resetDrag() {
+      drag = null;
+      viewer.classList.remove("dragging", "settling");
+      viewer.style.removeProperty("--viewer-dim");
+      $$("img", vtrack).forEach((img) => { img.style.removeProperty("translate"); img.style.removeProperty("scale"); });
+    }
+    function placeDrag(dx, dy) {
+      const down = Math.max(0, dy);
+      // upward the photo moves a quarter as far, like a rubber band
+      const y = dy < 0 ? dy / 4 : dy;
+      const lift = Math.min(1, down / (innerHeight * 0.45));
+      dragImg().style.translate = `${dx.toFixed(1)}px ${y.toFixed(1)}px`;
+      dragImg().style.scale = (1 - 0.28 * lift).toFixed(4);
+      viewer.style.setProperty("--viewer-dim", (1 - lift).toFixed(3));
+    }
+    vtrack.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse" || !e.isPrimary || active) return;
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, on: false, trail: [[e.timeStamp, e.clientY]] };
+    }, { passive: true });
+    vtrack.addEventListener("pointermove", (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const dx = e.clientX - drag.x;
+      const dy = e.clientY - drag.y;
+      if (!drag.on) {
+        if (Math.hypot(dx, dy) < 10) return;
+        if (Math.abs(dy) <= Math.abs(dx)) { drag = null; return; }   // sideways: the next photo
+        drag.on = true;
+        viewer.classList.remove("settling");
+        viewer.classList.add("dragging");
+        try { vtrack.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+      drag.trail.push([e.timeStamp, e.clientY]);
+      while (drag.trail.length > 2 && drag.trail[0][0] < e.timeStamp - 100) drag.trail.shift();
+      placeDrag(dx, dy);
+    }, { passive: true });
+    const letGo = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const was = drag;
+      drag = null;
+      if (!was.on) return;
+      draggedAt = performance.now();
+      const dy = e.clientY - was.y;
+      // The finger's speed over its last 100ms of movement, px per ms (+ is down). A finger that
+      // stopped before lifting (no move in the last 60ms) has none: that is a drag let go, not a flick.
+      const [t0, y0] = was.trail[0];
+      const [t1, y1] = was.trail.at(-1);
+      const speed = t1 > t0 && e.timeStamp - t1 < 60 ? (y1 - y0) / (t1 - t0) : 0;
+      viewer.classList.remove("dragging");
+      if (e.type === "pointerup" && (dy > 96 || (dy > 24 && speed > 0.35))) {
+        closeViewer();
+        return;
+      }
+      viewer.classList.add("settling");   // css springs translate, scale and the black back
+      viewer.style.removeProperty("--viewer-dim");
+      dragImg().style.removeProperty("translate");
+      dragImg().style.removeProperty("scale");
+    };
+    vtrack.addEventListener("pointerup", letGo);
+    vtrack.addEventListener("pointercancel", letGo);
+
     // Escape and the phone's back gesture close the dialog directly, without closeViewer: keep the
     // gallery on the photo the viewer was showing (closeViewer has already done it in that path).
-    viewer.addEventListener("close", () => main.goTo(shownInViewer, false));
+    viewer.addEventListener("close", () => { resetDrag(); main.goTo(shownInViewer, false); });
     $("#viewerClose").addEventListener("click", closeViewer);
     $("#viewerPrev").addEventListener("click", () => full.goTo(full.index - 1));
     $("#viewerNext").addEventListener("click", () => full.goTo(full.index + 1));
-    vtrack.addEventListener("click", (e) => { if (e.target.tagName !== "IMG") closeViewer(); });
+    vtrack.addEventListener("click", (e) => { if (performance.now() - draggedAt > 400 && e.target.tagName !== "IMG") closeViewer(); });
     viewer.addEventListener("keydown", (e) => {
       if (e.key === "ArrowRight") full.goTo(full.index + 1);
       if (e.key === "ArrowLeft") full.goTo(full.index - 1);
