@@ -659,8 +659,13 @@ a, img, button { -webkit-user-drag: none; }
 .viewer::backdrop { background: #000; opacity: var(--viewer-dim, 1); }
 .viewer .slides {
   height: 100%; aspect-ratio: auto; border-radius: 0; background: transparent; cursor: default;
-  touch-action: pan-x pinch-zoom;   /* sideways is the browser's swipe; a vertical drag is ours */
+  /* Every pan here is read by js/site.js (dismiss within 55° of straight down, else the next photo),
+     so no browser rule picks the direction. Pinching stays the browser's where it knows pinch-zoom;
+     the first line is the fallback for one that does not (an unknown value would drop the rule). */
+  touch-action: none;
+  touch-action: pinch-zoom;
 }
+.viewer .slides.panning { scroll-snap-type: none; }   /* the strip follows the finger; snapping returns when it lands */
 /* The image box is exactly the visible photo (not a letterboxed full-screen box), so it lines up
    with the gallery photo when one grows into the other. The fit is written out rather than left
    to width/height auto: a srcset image's intrinsic size is its file width divided by its density,

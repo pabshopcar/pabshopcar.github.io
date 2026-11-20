@@ -1136,71 +1136,106 @@
     track.addEventListener("pointerdown", (e) => { downX = e.clientX; moved = false; }, { passive: true });
     track.addEventListener("pointermove", (e) => { if (Math.abs(e.clientX - downX) > 8) moved = true; }, { passive: true });
     track.addEventListener("click", () => { if (!moved) openViewer(); });
-    // Swipe down to close, as in Photos: the photo follows the finger both ways and shrinks a little
-    // as it goes down, the black thins out to the car page underneath, and the controls fade. Let go
-    // past 96px down, or flick down, and the viewer closes from wherever the photo is (closeViewer
-    // flies it home from there); anything else springs it back. Sideways stays the photo strip's own
-    // swipe: the track allows only horizontal panning (css), so a vertical drag reaches this code.
-    let drag = null;
+    // Every gesture on the fullscreen photo is read here, the way Photos reads it (his report,
+    // 2026-11-19: he pulls down and a little sideways, and that did not close). The browser pans
+    // nothing on this track (css touch-action), so no browser rule can turn a diagonal pull into a
+    // sideways scroll. The direction is decided once the finger has moved 10px:
+    // - within 55° of straight down (or mostly up): dismiss. The photo follows the finger on both
+    //   axes and shrinks with the downward distance, the black thins out to the car page underneath
+    //   and the controls fade. Let go past 96px down, or flick down, whatever the sideways part, and
+    //   the viewer closes from wherever the photo is (closeViewer flies it home from there); anything
+    //   else springs it back on both axes. Upward it moves a quarter as far, like a rubber band.
+    // - anything else: a photo change. The strip follows the finger with snapping off, and on release
+    //   goes to the next or previous photo past a fifth of the width or on a sideways flick, else back.
+    const DISMISS_CONE = Math.tan((55 * Math.PI) / 180);   // |dx| / dy at the edge of the downward cone
+    let g = null;           // the gesture in progress
     let draggedAt = -1e9;   // a drag that ends over the black must not also count as a tap there
+    let snapBack = 0;
     const dragImg = () => viewerImg(shownInViewer);
     function resetDrag() {
-      drag = null;
+      g = null;
       viewer.classList.remove("dragging", "settling");
       viewer.style.removeProperty("--viewer-dim");
+      vtrack.classList.remove("panning");
       $$("img", vtrack).forEach((img) => { img.style.removeProperty("translate"); img.style.removeProperty("scale"); });
     }
     function placeDrag(dx, dy) {
       const down = Math.max(0, dy);
-      // upward the photo moves a quarter as far, like a rubber band
       const y = dy < 0 ? dy / 4 : dy;
       const lift = Math.min(1, down / (innerHeight * 0.45));
       dragImg().style.translate = `${dx.toFixed(1)}px ${y.toFixed(1)}px`;
       dragImg().style.scale = (1 - 0.28 * lift).toFixed(4);
       viewer.style.setProperty("--viewer-dim", (1 - lift).toFixed(3));
     }
-    vtrack.addEventListener("pointerdown", (e) => {
-      if (e.pointerType === "mouse" || !e.isPrimary || active) return;
-      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, on: false, trail: [[e.timeStamp, e.clientY]] };
-    }, { passive: true });
-    vtrack.addEventListener("pointermove", (e) => {
-      if (!drag || e.pointerId !== drag.id) return;
-      const dx = e.clientX - drag.x;
-      const dy = e.clientY - drag.y;
-      if (!drag.on) {
-        if (Math.hypot(dx, dy) < 10) return;
-        if (Math.abs(dy) <= Math.abs(dx)) { drag = null; return; }   // sideways: the next photo
-        drag.on = true;
-        viewer.classList.remove("settling");
-        viewer.classList.add("dragging");
-        try { vtrack.setPointerCapture(e.pointerId); } catch (err) {}
-      }
-      drag.trail.push([e.timeStamp, e.clientY]);
-      while (drag.trail.length > 2 && drag.trail[0][0] < e.timeStamp - 100) drag.trail.shift();
-      placeDrag(dx, dy);
-    }, { passive: true });
+    // The finger's speed over its last 100ms of movement along x (1) or y (2), px per ms. A finger
+    // that stopped before lifting (no move in the last 60ms) has none: a drag let go, not a flick.
+    const speedOf = (trail, axis, now) => {
+      const [a, b] = [trail[0], trail.at(-1)];
+      return b[0] > a[0] && now - b[0] < 60 ? (b[axis] - a[axis]) / (b[0] - a[0]) : 0;
+    };
     const letGo = (e) => {
-      if (!drag || e.pointerId !== drag.id) return;
-      const was = drag;
-      drag = null;
-      if (!was.on) return;
+      if (!g || e.pointerId !== g.id) return;
+      const was = g;
+      g = null;
+      if (!was.mode) return;   // a tap: the click handler below decides
       draggedAt = performance.now();
+      const dx = e.clientX - was.x;
       const dy = e.clientY - was.y;
-      // The finger's speed over its last 100ms of movement, px per ms (+ is down). A finger that
-      // stopped before lifting (no move in the last 60ms) has none: that is a drag let go, not a flick.
-      const [t0, y0] = was.trail[0];
-      const [t1, y1] = was.trail.at(-1);
-      const speed = t1 > t0 && e.timeStamp - t1 < 60 ? (y1 - y0) / (t1 - t0) : 0;
-      viewer.classList.remove("dragging");
-      if (e.type === "pointerup" && (dy > 96 || (dy > 24 && speed > 0.35))) {
-        closeViewer();
+      const up = e.type === "pointerup";
+      if (was.mode === "dismiss") {
+        viewer.classList.remove("dragging");
+        if (up && (dy > 96 || (dy > 24 && speedOf(was.trail, 2, e.timeStamp) > 0.35))) {
+          closeViewer();
+          return;
+        }
+        viewer.classList.add("settling");   // css springs translate (both axes), scale and the black back
+        viewer.style.removeProperty("--viewer-dim");
+        dragImg().style.removeProperty("translate");
+        dragImg().style.removeProperty("scale");
         return;
       }
-      viewer.classList.add("settling");   // css springs translate, scale and the black back
-      viewer.style.removeProperty("--viewer-dim");
-      dragImg().style.removeProperty("translate");
-      dragImg().style.removeProperty("scale");
+      const w = vtrack.clientWidth;
+      const vx = speedOf(was.trail, 1, e.timeStamp);
+      let i = was.index;
+      if (up && (dx < -w / 5 || vx < -0.35)) i += 1;
+      else if (up && (dx > w / 5 || vx > 0.35)) i -= 1;
+      full.goTo(Math.max(0, Math.min(full.count - 1, i)));
+      // snapping comes back once the strip has landed (switched on mid-way it would jump)
+      const done = () => { clearTimeout(snapBack); if (!g) vtrack.classList.remove("panning"); };
+      vtrack.addEventListener("scrollend", done, { once: true });
+      snapBack = setTimeout(done, 900);
     };
+    vtrack.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse" || active) return;
+      if (g) {   // a second finger: pinching is the browser's, the drag ends where it is
+        const [t, x, y] = g.trail.at(-1);
+        letGo({ type: "pointercancel", pointerId: g.id, clientX: x, clientY: y, timeStamp: t });
+        return;
+      }
+      g = { id: e.pointerId, x: e.clientX, y: e.clientY, mode: null, left: vtrack.scrollLeft, index: full.index, trail: [[e.timeStamp, e.clientX, e.clientY]] };
+    }, { passive: true });
+    vtrack.addEventListener("pointermove", (e) => {
+      if (!g || e.pointerId !== g.id) return;
+      const dx = e.clientX - g.x;
+      const dy = e.clientY - g.y;
+      g.trail.push([e.timeStamp, e.clientX, e.clientY]);
+      while (g.trail.length > 2 && g.trail[0][0] < e.timeStamp - 100) g.trail.shift();
+      if (!g.mode) {
+        if (Math.hypot(dx, dy) < 10) return;
+        const dismiss = dy > 0 ? Math.abs(dx) <= dy * DISMISS_CONE : Math.abs(dx) < -dy;
+        g.mode = dismiss ? "dismiss" : "page";
+        try { vtrack.setPointerCapture(e.pointerId); } catch (err) {}
+        if (dismiss) {
+          viewer.classList.remove("settling");
+          viewer.classList.add("dragging");
+        } else {
+          clearTimeout(snapBack);
+          vtrack.classList.add("panning");
+        }
+      }
+      if (g.mode === "dismiss") placeDrag(dx, dy);
+      else vtrack.scrollLeft = Math.max(0, Math.min(vtrack.scrollWidth - vtrack.clientWidth, g.left - dx));
+    }, { passive: true });
     vtrack.addEventListener("pointerup", letGo);
     vtrack.addEventListener("pointercancel", letGo);
 
